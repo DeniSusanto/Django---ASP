@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^cm_cart$', views.cm_cart, name='cm_cart'),
     url(r'^submitorder$', views.submitorder, name='submitorder'),
     url(r'^dp_dashboard$', views.dp_dashboard, name='dp_dashboard'),
+    url(r'^dp_session$', views.dp_session, name='dp_session'),
     url(r'^itinerary_download$', views.itineraryDownload, name='itinerary_download'),
     url(r'^close_session$', views.dp_close_session, name='dp_close_session'),
 ]
