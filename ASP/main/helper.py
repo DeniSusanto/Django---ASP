@@ -142,12 +142,7 @@ def routePlanner(clinics):
 
     leg_list = []
     for i in range(len(best_route)):
-        if i == 0:
-            leg = "Leg " + str(i + 1) + ": Queen Mary Hospital -> " + best_route[i].name
-        else:
-            leg = "Leg " + str(i + 1) + ": " + best_route[i - 1].name + " -> " + best_route[i].name
+        leg = "(" + str(best_route[i - 1].lat) + "," + str(best_route[i].longitude) + "," + str(best_route[i].alt) + ")"
         leg_list.append(leg)
-    leg_list.append("Leg " + str(len(best_route) + 1) + ": " + best_route[len(best_route) - 1].name +
-                    " -> Queen Mary Hospital")
-
+    leg_list.append("(22.269660,114.131303,163)")
     return leg_list
