@@ -25,14 +25,6 @@
     <br>
     <div class="row justify-content-md-center">
         <div class="col col-lg-9"><b>Shopping Cart</b></div>
-        <div class="form-group">
-            <label for="priorityLevel">Priority Level</label>
-            <select class="form-control" id="priorityLevel">
-                <option name='high'>High</option>
-                <option name='medium'>Medium</option>
-                <option name='low'>Low</option>
-            </select>
-        </div>
     </div>
     <br>
     <div class="container">
@@ -59,11 +51,25 @@
                     <!---->
             </tbody>
         </table>
-    </div>
-    <nav class="navbar fixed-bottom navbar-light bg-light">
-        <div id="browse_app">
-            <a class="btn btn-large btn-info" href="">Submit</a>
+
+        <div class="form-group n8_center_block">
+            <form>
+                <div class="form-row align-items-center">
+                    <div class="col-auto my-1">
+                    <label class="mr-sm-2" for="prioritySelection">Priority</label>
+                    <select class="custom-select mr-sm-2" id="prioritySelection">
+                        <option value="1" selected>High</option>
+                        <option value="2">Medium</option>
+                        <option value="3">Low</option>
+                    </select>
+                    </div>
+                    <div class="col-auto my-1">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </nav>
+    </div>
+    
 </body>
 </html>

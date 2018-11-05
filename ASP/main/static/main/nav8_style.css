@@ -2,6 +2,7 @@
 .n8_navbar{
     padding-left: calc(4vw + 2vh);
     padding-right: calc(4vw + 2vh);
+    margin-bottom: calc(2vw + 2vh);
 }
 .n8_navbar .n8_navbar_title{
     font-family: 'Pacifico', sans-serif;
@@ -43,4 +44,19 @@ z-index: 998;
     position: relative;
     top: 50%;
     transform: translateY(-50%);
+}
+.n8_center_block{
+    -webkit-box-align: center;
+    -webkit-box-pack: center;
+    display: -webkit-box;
+}
+
+.n8_content_title{
+    font-family: 'Pacifico', sans-serif;
+    font-size: calc(1.2vw + 1.1vh);
+}
+
+.n8_content_sub_title{
+    font-family: 'Tajawal', sans-serif;
+    font-size: calc(0.8vw + 0.8vh);
 }

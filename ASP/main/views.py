@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.db.models import Q
+from django.db.models import Count
 from .models import *
 from .helper import *
 import csv
@@ -122,13 +123,20 @@ def cm_cart(request):
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
         cartObj=Cart.objects.get(clinicID=clinicMan)
         cartWeight=cartObj.getWeight()
-        itemsCartList=ItemsInCart.objects.filter(cartID=cartObj)
+        itemsCount=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').annotate(total=Count('cartID')).order_by('itemID')
+        #itemsCartList=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').distinct().order_by('itemID')
+        itemsInCart=[]
+        for item in itemsCount:
+            itemName=ItemCatalogue.objects.get(pk=item['itemID'])
+            tup=(item['itemID'],itemName, item['total'])
+            itemsInCart.append(tup)
+        
         # itemPkList=[]
         # for item in itemsCartList:
         #     itemPkList.append(item.itemID.id)
         # itemList=ItemCatalogue.objects.filter(id__in=itemPkList)
         context={
-                    'itemsInCart':itemsCartList,
+                    'itemsInCart':itemsInCart,
                     'clinicManager':clinicMan,
                     'weight':cartWeight,
                 }
@@ -137,23 +145,24 @@ def cm_cart(request):
     else:#delete item from cart request
         item=request.POST.get('item')
         itemObj=ItemCatalogue.objects.get(pk=item)
-        quantity=request.POST.get('quantity')
-
+        quantity=int(request.POST.get('quantity'))
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
 
-        itemInCart=ItemsInCart.objects.filter(Q(cartID__clinicID=clinicMan) & Q(itemID=itemObj))
-        for i in range(quantity):
-            itemInCart[i].delete()
+        itemInCart=ItemsInCart.objects.filter(Q(cartID__clinicID=clinicMan) & Q(itemID=itemObj))[:quantity]
+        ItemsInCart.objects.filter(pk__in=itemInCart).delete()
+
+        # for i in range(int(quantity)):
+        #     itemInCart[i].delete()
 
         return redirect('/main/cm_cart')
 
 
 def submitorder(request):
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
-    cartObj=Cart.objects.get()
-    priority=request.POST.get('priority')
+    cartObj=Cart.objects.get(clinicID=clinicMan)
+    priority=int(request.POST.get('priority'))
     succeed=cartToOrder(cartObj, priority)
-    if suceed:#if suceed to migrate cart to order
+    if succeed:#if suceed to migrate cart to order
         return HttpResponse("Suceeded")
     else:
         return redirect('/main/cm_cart')
@@ -215,15 +224,15 @@ def dp_close_session(request):
     return redirect('/main/dp_dashboard')
 
 def debug(request):
-    # #adding item to cart
-    # clinicMan=ClinicManager.objects.get(pk=3)
-    # itemObj=ItemCatalogue.objects.get(pk=2)
-    # cartObj=Cart.objects.get(clinicID=clinicMan)
-    # quantity=2
-    # for i in range(quantity):
-    #     itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
-    #     itemInCart.save()
-    # return HttpResponse("all good")
+    #adding item to cart
+    clinicMan=ClinicManager.objects.get(pk=2) 
+    itemObj=ItemCatalogue.objects.get(pk=3)
+    cartObj=Cart.objects.get(clinicID=clinicMan)
+    quantity=10
+    for i in range(quantity):
+        itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
+        itemInCart.save()
+    return HttpResponse("all good")
 
     # ##getWeight()
     # myCart=Cart.objects.get(pk=1)
