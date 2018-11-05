@@ -41,7 +41,9 @@ def loginSimulationCM5(request):
 
 
 def loginSimulationDP1(request):
-    pass
+    request.session['id']=1
+    dp= Dispatcher.objects.get(pk=1)
+    return redirect('/main/dp_dashboard')
 
 def onlineOrder(request):
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
@@ -119,7 +121,7 @@ def cm_cart(request):
     if request.method=='GET':
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
         cartObj=Cart.objects.get(clinicID=clinicMan)
-        cartWeight=cartObj.cartWeight()
+        cartWeight=cartObj.getWeight()
         itemsCartList=ItemsInCart.objects.filter(cartID=cartObj)
         # itemPkList=[]
         # for item in itemsCartList:
@@ -167,7 +169,7 @@ def dp_dashboard(request):
                     'dispatcher':dispatcher,
                     'orderQueue':remainingQueue,
                 }
-    return render(request, 'dp_dashboard.html', context)
+    return render(request, 'main/dp_dashboard.html', context)
 
 def dp_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')

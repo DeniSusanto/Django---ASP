@@ -20,7 +20,7 @@
 <body>
     <nav class="navbar navbar-expand navbar-dark bg-dark n8_navbar">
   <!-- Navbar content -->
-  <a class="navbar-brand n8_navbar_title" href="{%url "cm_home"%}" style="font-family:Lobster;">AS-P</a>
+  <a class="navbar-brand n8_navbar_title" href="{%url "cm_home"%}">Dashboard</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -50,19 +50,16 @@
     <ul class="navbar-nav ml-auto"> 
       <li>
         <div class="n8_inset">
-          <img src="{{clinicManager.image.url}}">
+          <img src="{{dispatcher.image.url}}">
         </div>
       </li>
       
 
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle n8_vertical_middle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color:#d8d8d8;">
-           {{clinicManager.fullName}}
+           {{dispatcher.fullName}}
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="{%url "cm_cart"%}">Cart</a>
-          <a class="dropdown-item" href="#">Order Tracking</a>
-          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#">Change Profile</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" style="color:red;">Logout</a>
