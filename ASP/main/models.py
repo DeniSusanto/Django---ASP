@@ -38,6 +38,9 @@ class UserRecord(models.Model):
     class Meta:
         abstract=True
 
+    def fullName(self):
+        return self.firstName + " " + self.lastName
+
 class ClinicManager(UserRecord):
     locationID=models.OneToOneField(Clinic, on_delete=models.CASCADE)
     def __str__(self):

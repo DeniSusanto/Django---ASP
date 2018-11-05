@@ -14,25 +14,48 @@ def boredaf(request):
     return redirect('http://www.staggeringbeauty.com/')
 #####DELETE THIS###
 
-def loginSimulationCM(request):
+def loginSimulationCM1(request):
     request.session['id']=1
-    return HttpResponse("done")
+    cm= ClinicManager.objects.get(pk=1)
+    return redirect('/main/cm_home')
 
-def loginSimulationDP(request):
+def loginSimulationCM2(request):
+    request.session['id']=2
+    cm= ClinicManager.objects.get(pk=2)
+    return redirect('/main/cm_home')
+
+def loginSimulationCM3(request):
+    request.session['id']=3
+    cm= ClinicManager.objects.get(pk=3)
+    return redirect('/main/cm_home')
+
+def loginSimulationCM4(request):
+    request.session['id']=4
+    cm= ClinicManager.objects.get(pk=4)
+    return redirect('/main/cm_home')
+
+def loginSimulationCM5(request):
+    request.session['id']=5
+    cm= ClinicManager.objects.get(pk=5)
+    return redirect('/main/cm_home')
+
+
+def loginSimulationDP1(request):
     pass
 
 def onlineOrder(request):
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
     if(request.method=='GET'):#if session has filter request
-        if 'category' in session.request:
+        if 'category' in request.session:
             category=request.session['category']
             categoryObj=ItemCategory.objects.get(pk=category)
             filteredItems=ItemCatalogue.objects.filter(category=categoryObj)
             context={
+            'title': "Home",
             'items':filteredItems,
-            'clinicManager':clinicMan
+            'clinicManager':clinicMan,
             }
-            return render(request, 'cm_home.html', context)
+            return render(request, 'main/cm_home.html', context)
         else:#if session has no filter request
             allItems=ItemCatalogue.objects.all()
             ###Output all item name
@@ -42,10 +65,11 @@ def onlineOrder(request):
             #     name=name+"<br>"
             # return HttpResponse(name)
             context={
+                'title': "Home",
                 'items':allItems,
                 'clinicManager':clinicMan
                 }
-            return render(request, 'cm_home.html', context)
+            return render(request, 'main/cm_home.html', context)
     elif(request.method=='POST'):
          if('category' in request.POST):
             category=request.POST.get('category')
@@ -61,7 +85,7 @@ def onlineOrder(request):
                 # 'items':filteredItems,
                 # 'clinicManager':clinicMan
                 # }
-                # return render(request, 'cm_home.html', context)
+                # return render(request, 'main/cm_home.html', context)
                 return redirect('/main/cm_home')
          else:#request to add item to cart
             item=request.POST.get('item')
@@ -70,10 +94,20 @@ def onlineOrder(request):
             cartObj=Cart.objects.get(clinicID=clinicMan)
 
             if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):
+                if 'category' in request:
+                    category=request.session['category']
+                    categoryObj=ItemCategory.objects.get(pk=category)
+                    theItems=ItemCatalogue.objects.filter(category=categoryObj)
+                else:
+                    theItems=ItemCatalogue.objects.all()
+
                 context={
-                'error':"Order weight limit is reached"
+                'title': "Home",
+                'error':"Order weight limit is reached",
+                'clinicManager':clinicMan,
+                'item' : theItems
                 }
-                return render(request, 'cm_home.html', context)
+                return render(request, 'main/cm_home.html', context)
            
 
             for i in range(quantity):
@@ -97,7 +131,7 @@ def cm_cart(request):
                     'weight':cartWeight,
                 }
         
-        return render(request, 'cm_cart.html', context)
+        return render(request, 'main/cm_cart.html', context)
     else:#delete item from cart request
         item=request.POST.get('item')
         itemObj=ItemCatalogue.objects.get(pk=item)
@@ -144,7 +178,7 @@ def dp_session(request):
                 'nextOrders':ordersToBeProcessed,
                 'dispatcher':dispatcher,
             }
-    return render(request, 'dp_session.html', context)
+    return render(request, 'main/dp_session.html', context)
 
 def itineraryDownload(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')

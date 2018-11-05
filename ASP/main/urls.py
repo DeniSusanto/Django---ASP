@@ -12,8 +12,12 @@ urlpatterns = [
     ###pls delete###
 
     ###FOR PARTIAL EXECUTABLE ONLY##
-    url(r'^logincm$', views.loginSimulationCM),
-    url(r'^logindp$', views.loginSimulationDP),
+    url(r'^logincm1$', views.loginSimulationCM1),
+    url(r'^logincm2$', views.loginSimulationCM2),
+    url(r'^logincm3$', views.loginSimulationCM3),
+    url(r'^logincm4$', views.loginSimulationCM4),
+    url(r'^logincm5$', views.loginSimulationCM5),
+    url(r'^logindp1$', views.loginSimulationDP1),
 
 
     url(r'^cm_home$', views.onlineOrder, name='cm_home'),
