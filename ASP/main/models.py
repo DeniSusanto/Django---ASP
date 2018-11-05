@@ -32,6 +32,7 @@ class UserRecord(models.Model):
     username=models.CharField(max_length=250, unique=True)
     password=models.CharField(max_length=100)
     email=models.EmailField(max_length=254, unique=True)
+    image=models.ImageField(upload_to="profilePic/", blank=True, null=True, default='profilePic/noUserPic.png')
 
     class Meta:
         abstract=True

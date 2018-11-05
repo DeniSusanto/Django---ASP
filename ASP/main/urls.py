@@ -23,4 +23,4 @@ urlpatterns = [
     url(r'^itinerary_download$', views.itineraryDownload, name='itinerary_download'),
     url(r'^close_session$', views.dp_close_session, name='dp_close_session'),
 ]
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+#urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
