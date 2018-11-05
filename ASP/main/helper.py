@@ -96,23 +96,23 @@ def dp_nextOrders(allOrders):
 
     return (orderToLoad, remainingOrder)
 
-#return a list of string where each element represent a string of the leg information
+# return a list of string where each element represent a string of the leg information
 def routePlanner(clinic):
-    #queenmary hospital detail: Lat. 22.243243, Long. 114.153765
+    # Queen Mary hospital detail: Lat. 22.243243, Long. 114.153765
     qmLat=22.243243
     qmLong=114.153765
 
-    #function to find the distance between 2 location
+    # function to find the distance between 2 location
     def haversine_km(lat1,long1,lat2, long2):
-    d2r=math.pi / 180.0
-    dlong = (long2 - long1) * d2r
-    dlat = (lat2 - lat1) * d2r
-    a = pow(sin(dlat/2.0), 2) + cos(lat1*d2r) * cos(lat2*d2r) * pow(sin(dlong/2.0), 2)
-    c = 2 * atan2(sqrt(a), sqrt(1-a))
-    distance = 6371 * c
-    #return distance
+        d2r=math.pi / 180.0
+        dlong = (long2 - long1) * d2r
+        dlat = (lat2 - lat1) * d2r
+        a = pow(sin(dlat/2.0), 2) + cos(lat1*d2r) * cos(lat2*d2r) * pow(sin(dlong/2.0), 2)
+        c = 2 * atan2(sqrt(a), sqrt(1-a))
+        distance = 6371 * c
+        return distance
 
-    #only trial, please return like this
+    # only trial, please return like this
     strList=[]
     strList.append("Trial")
     strList.append("Anotha one")
