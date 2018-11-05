@@ -22,7 +22,7 @@ class ItemCatalogue(models.Model):
     weight=models.FloatField()
     category= models.ForeignKey(ItemCategory, on_delete=models.CASCADE)
     image=models.ImageField(upload_to="item/")
-    description=models.TextField()
+    description=models.TextField(blank=True, null=True)
 
     def __str__(self):
         return str(self.name)
