@@ -180,7 +180,7 @@ def dp_close_session(request):
 
 def debug(request):
     # #adding item to cart
-    # clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+    # clinicMan=ClinicManager.objects.get(pk=3)
     # itemObj=ItemCatalogue.objects.get(pk=2)
     # cartObj=Cart.objects.get(clinicID=clinicMan)
     # quantity=2
@@ -208,10 +208,10 @@ def debug(request):
     #     itemInCart[i].delete()
     # return HttpResponse("deleted")
     
-    # #migrate cart to order simulator
-    # cartObj=Cart.objects.get(clinicID__id=1)
-    # priority= priorityToInt("High")
-    # cartToOrder(cartObj, priority)
+    #migrate cart to order simulator
+    cartObj=Cart.objects.get(clinicID__id=3)
+    priority= priorityToInt("High")
+    cartToOrder(cartObj, priority)
 
     # #output all orders
     # orderList=Order.objects.all().order_by('priority','orderDateTime')
