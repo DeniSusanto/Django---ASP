@@ -142,7 +142,7 @@ def routePlanner(clinics):
 
     leg_list = []
     for i in range(len(best_route)):
-        leg = "(" + str(best_route[i - 1].lat) + "," + str(best_route[i].long) + "," + str(best_route[i].alt) + ")"
+        leg = "(" + str(best_route[i - 1].lat) + "," + str(best_route[i].longitude) + "," + str(best_route[i].alt) + ")"
         leg_list.append(leg)
     leg_list.append("(22.269660,114.131303,163)")
     return leg_list
