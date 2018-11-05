@@ -53,15 +53,16 @@ def onlineOrder(request):
             if category==-1:
                 if('category' in request.session):
                     del request.session['category']
-                    redirect('/main/cm_home')
+                return redirect('/main/cm_home')
             else:#request to browse (filter) items
                 request.session['category']=category #assign filter to session
-                filteredItems=ItemCatalogue.objects.filter(category=category)
-                context={
-                'items':filteredItems,
-                'clinicManager':clinicMan
-                }
-                return render(request, 'cm_home.html', context)
+                # filteredItems=ItemCatalogue.objects.filter(category=category)
+                # context={
+                # 'items':filteredItems,
+                # 'clinicManager':clinicMan
+                # }
+                # return render(request, 'cm_home.html', context)
+                return redirect('/main/cm_home')
          else:#request to add item to cart
             item=request.POST.get('item')
             quantity=int(request.POST.get('quantity'))
@@ -78,7 +79,7 @@ def onlineOrder(request):
             for i in range(quantity):
                 itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
                 itemInCart.save()
-            redirect('main/cm_home')
+            return redirect('/main/cm_home')
 
 def cm_cart(request):
     if request.method=='GET':
@@ -108,7 +109,7 @@ def cm_cart(request):
         for i in range(quantity):
             itemInCart[i].delete()
 
-        redirect('main/cm_cart')
+        return redirect('/main/cm_cart')
 
 
 def submitorder(request):
@@ -119,7 +120,7 @@ def submitorder(request):
     if suceed:
         return HttpResponse("Suceeded")
     else:
-        redirect('main/cm_cart')
+        return redirect('/main/cm_cart')
 
 def dp_dashboard(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
@@ -175,7 +176,7 @@ def dp_close_session(request):
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
         order.status=statusToInt("Dispatched")
         order.save()
-    redirect('main/dp_dashboard')
+    return redirect('/main/dp_dashboard')
 
 def debug(request):
     # #adding item to cart
@@ -248,7 +249,7 @@ def debug(request):
     #     name+=str(order.id)
     #     name+="<br>"
     # return HttpResponse(name)
-
-    return HttpResponse(datetime.datetime.now())
+    return redirect('/main/logincm')
+    #return HttpResponse(datetime.datetime.now())
 
     pass
