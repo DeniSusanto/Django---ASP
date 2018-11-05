@@ -117,7 +117,7 @@ def submitorder(request):
     cartObj=Cart.objects.get()
     priority=request.POST.get('priority')
     succeed=cartToOrder(cartObj, priority)
-    if suceed:
+    if suceed:#if suceed to migrate cart to order
         return HttpResponse("Suceeded")
     else:
         return redirect('/main/cm_cart')
@@ -208,10 +208,10 @@ def debug(request):
     #     itemInCart[i].delete()
     # return HttpResponse("deleted")
     
-    #migrate cart to order simulator
-    cartObj=Cart.objects.get(clinicID__id=3)
-    priority= priorityToInt("High")
-    cartToOrder(cartObj, priority)
+    # #migrate cart to order simulator
+    # cartObj=Cart.objects.get(clinicID__id=3)
+    # priority= priorityToInt("High")
+    # cartToOrder(cartObj, priority)
 
     # #output all orders
     # orderList=Order.objects.all().order_by('priority','orderDateTime')
