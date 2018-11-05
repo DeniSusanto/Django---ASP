@@ -106,21 +106,22 @@ def dp_nextOrders(allOrders):
     return (orderToLoad, remainingOrder)
 
 
+# Calculate distance of 2 places from their latitude and longitude
+def calc_dist(lat1, long1, lat2, long2):
+    rad = pi / 180.0
+    d_long = (long2 - long1) * rad
+    d_lat = (lat2 - lat1) * rad
+    a = pow(sin(d_lat / 2.0), 2) + cos(lat1 * rad) * cos(lat2 * rad) * pow(sin(d_long / 2.0), 2)
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    distance = 6371 * c
+    return distance
+
+
 # return a list of string where each element represent a string of the leg information
 def routePlanner(clinics):
     # Queen Mary hospital detail: Lat. 22.243243, Long. 114.153765
     qm_lat = 22.243243
     qm_long = 114.153765
-
-    # Calculate distance of 2 places from their latitude and longitude
-    def calc_dist(lat1, long1, lat2, long2):
-        rad = pi / 180.0
-        d_long = (long2 - long1) * rad
-        d_lat = (lat2 - lat1) * rad
-        a = pow(sin(d_lat / 2.0), 2) + cos(lat1 * rad) * cos(lat2 * rad) * pow(sin(d_long / 2.0), 2)
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        distance = 6371 * c
-        return distance
 
     all_routes = list(permutations(clinics))
     best_route = ()
@@ -131,10 +132,10 @@ def routePlanner(clinics):
         for i in range(len(route)):
             route_name.append(route[i].name)
             if i == 0:
-                dist += calc_dist(qm_lat, qm_long, route[i].lat, route[i].long)
+                dist += calc_dist(qm_lat, qm_long, route[i].lat, route[i].longitude)
             else:
-                dist += calc_dist(route[i - 1].lat, route[i - 1].long, route[i].lat, route[i].long)
-        dist += calc_dist(route[len(route) - 1].lat, route[len(route) - 1].long, qm_lat, qm_long)
+                dist += calc_dist(route[i - 1].lat, route[i - 1].longitude, route[i].lat, route[i].longitude)
+        dist += calc_dist(route[len(route) - 1].lat, route[len(route) - 1].longitude, qm_lat, qm_long)
         if dist < best_dist:
             best_dist = dist
             best_route = route
