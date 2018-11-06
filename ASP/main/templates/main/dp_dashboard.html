@@ -1,4 +1,63 @@
 {%extends "main/dp_base.html"%}
 
 {%block content%}
+<div class="container" > 
+            <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
+                <div class="col-md6 n8_content_title-big" style ="color: #45b7a7;">
+                    Ready to dispatch
+                </div>
+                <div class="col-md6"><a href="{%url "dp_session"%}">
+                        <button type="button" class="btn btn-primary nav8_eclipse_btn n8_content_sub_title">Start dispatch</button>
+                        </a>
+                </div>
+            </div>
+            <div class="row">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Priority</th>
+                            <th>Weight</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    {%for order in nextOrders%}
+                    <tr>
+                        <td>{{order.id}}</td>
+                        <td>{{order.priorityString}}</td>
+                        <td>{{order.weight}}</td>
+                        <td>{{order.orderDateTime}}</td>
+                    </tr>
+                    {%endfor%}
+                </table>
+            </div>
+    </div>
+    <br><br><br><br>
+    <div class="container">    
+            <div class="row">
+                <div class="n8_content_title-big" style="margin-bottom: calc(1vw + 1vh);color:#bc1602;">
+                    Waiting for dispatch
+                </div>
+            </div>
+            <div class="row">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Priority</th>
+                            <th>Weight</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                   {%for order in orderQueue%}
+                    <tr>
+                        <td>{{order.id}}</td>
+                        <td>{{order.priorityString}}</td>
+                        <td>{{order.weight}}</td>
+                        <td>{{order.orderDateTime}}</td>
+                    </tr>
+                    {%endfor%}
+                </table>
+            </div>
+    </div>
 {%endblock%}

@@ -1,4 +1,5 @@
 from django.db import models
+from .helper import *
 
 # Create your models here.
 
@@ -112,6 +113,9 @@ class Order(models.Model):
 
     def __str__(self):
         return str("Order id:" + str(self.id))
+
+    def priorityString(self):
+        return intToPriority(self.priority)
 
 class ItemsInOrder(models.Model):
     orderID=models.ForeignKey(Order, on_delete=models.CASCADE)
