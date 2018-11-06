@@ -197,6 +197,8 @@ def dp_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
+    if not ordersToBeProcessed:
+        return redirect('/main/dp_dashboard')
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     context={
                 'nextOrders':ordersToBeProcessed,

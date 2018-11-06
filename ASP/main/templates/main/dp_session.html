@@ -1,0 +1,45 @@
+{%extends "main/dp_base.html"%}
+
+{%block content%}
+{% load static %}
+<div class="container">
+<div class="d-flex justify-content-between">
+        <div class="n8_content_title-big">
+            <b>Delivery Details</b>
+        </div>
+        <div>
+            Total Weight: <!--insert drone weight here-->25 kg &ensp;   
+        </div>
+    </div>
+    <br>
+    <div>
+        <table class="table table-striped">
+            <thead>
+                <tr class="n8_content_sub_title">
+                    <th scope="col">Order Number</th>
+                    <th scope="col">Order Weight</th>
+                    <th scope="col">Date & Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for order in nextOrders%}
+                <tr>
+                    <td scope="col"><!--insert order number here-->{{order.id}}</th>
+                    <td scope="col"><!--insert order weight here-->{{order.weight}}</th>
+                    <td scope="col"><!--insert order weight here-->{{order.orderDateTime}}</th>
+                </tr>
+                {%endfor%}
+                <!---->
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <div style="display: inline-block; float: right; margin-left:calc(0.5vw + 0.5vh);">
+             <a class="btn btn-large btn-info" href="{% url 'dp_close_session' %}">End Session</a>
+        </div>
+        <div style="display: inline-block; float: right;margin-right:calc(0.5vw + 0.5vh);">
+        <a href="{%url 'itinerary_download'%}"><img src="{% static 'main/download.png' %}" width="30" height="30"  title="Download CSV File"></a>
+        </div>
+    </div>
+</div>
+    {%endblock%}
