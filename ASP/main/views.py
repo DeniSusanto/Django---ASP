@@ -62,6 +62,20 @@ def onlineOrder(request):
                 'clinicManager':clinicMan,
                 'allCategories':allCategories,
                 }
+                
+                if 'success' in request.session:
+                    success=request.session['success']
+                    del request.session['success']
+                    context['success']=success
+                if 'error' in request.session:
+                    error=request.session['error']
+                    del request.session['error']
+                    context['error']=error
+                if 'message' in request.session:
+                    message=request.session['message']
+                    del request.session['message']
+                    context['message']=message
+                
                 return render(request, 'main/cm_home.html', context)
             else:
                 del request.session['category']
@@ -81,6 +95,20 @@ def onlineOrder(request):
                 'filter':-1,
                 'allCategories':allCategories,
                 }
+
+            if 'success' in request.session:
+                success=request.session['success']
+                del request.session['success']
+                context['success']=success
+            if 'error' in request.session:
+                error=request.session['error']
+                del request.session['error']
+                context['error']=error
+            if 'message' in request.session:
+                message=request.session['message']
+                del request.session['message']
+                context['message']=message
+                
             return render(request, 'main/cm_home.html', context)
     elif(request.method=='POST'):
          if('category' in request.POST):
@@ -105,23 +133,23 @@ def onlineOrder(request):
             itemObj=ItemCatalogue.objects.get(pk=item)
             cartObj=Cart.objects.get(clinicID=clinicMan)
 
-            if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):
-                if 'category' in request:
-                    category=request.session['category']
-                    categoryObj=ItemCategory.objects.get(pk=category)
-                    theItems=ItemCatalogue.objects.filter(category=categoryObj)
-                    fil=category #there exist filter
-                else:
-                    theItems=ItemCatalogue.objects.all()
-                    fil=-1
+            if 'category' in request:
+                category=request.session['category']
+                categoryObj=ItemCategory.objects.get(pk=category)
+                theItems=ItemCatalogue.objects.filter(category=categoryObj)
+                fil=category #there exist filter
+            else:
+                theItems=ItemCatalogue.objects.all()
+                fil=-1
 
+            if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):
                 context={
                 'title': "Home",
                 'filter': fil,
                 'error':"Order weight limit is reached",
                 'allCategories':allCategories,
                 'clinicManager':clinicMan,
-                'item' : theItems
+                'items' : theItems,
                 }
                 return render(request, 'main/cm_home.html', context)
            
@@ -129,13 +157,23 @@ def onlineOrder(request):
             for i in range(quantity):
                 itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
                 itemInCart.save()
-            return redirect('/main/cm_home')
+
+            context={
+                'title': "Home",
+                'filter': fil,
+                'success':"Item(s) have been added to cart",
+                'allCategories':allCategories,
+                'clinicManager':clinicMan,
+                'items' : theItems,
+            }
+            return render(request, 'main/cm_home.html', context)
+            
 
 def cm_cart(request):
     if request.method=='GET':
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
         cartObj=Cart.objects.get(clinicID=clinicMan)
-        cartWeight=cartObj.getWeight()
+        cartWeight=format(cartObj.getWeight(),'.2f') 
         itemsCount=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').annotate(total=Count('cartID')).order_by('itemID')
         #itemsCartList=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').distinct().order_by('itemID')
         itemsInCart=[]
@@ -148,12 +186,21 @@ def cm_cart(request):
         # for item in itemsCartList:
         #     itemPkList.append(item.itemID.id)
         # itemList=ItemCatalogue.objects.filter(id__in=itemPkList)
-        context={
+        if 'success' in request.session:
+            message=request.session['success']
+            del request.session['success']
+            context={
+                    'success': message,
                     'itemsInCart':itemsInCart,
                     'clinicManager':clinicMan,
                     'weight':cartWeight,
-                }
-        
+                    }
+        else:
+            context={
+                    'itemsInCart':itemsInCart,
+                    'clinicManager':clinicMan,
+                    'weight':cartWeight,
+            }
         return render(request, 'main/cm_cart.html', context)
     else:#delete item from cart request
         item=request.POST.get('item')
@@ -166,38 +213,62 @@ def cm_cart(request):
 
         # for i in range(int(quantity)):
         #     itemInCart[i].delete()
-
+        message=str(quantity) + " " + itemObj.name + " have been removed"
+        request.session['success']=message
         return redirect('/main/cm_cart')
 
 
 def submitorder(request):
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+    allCategories=ItemCategory.objects.all()
     cartObj=Cart.objects.get(clinicID=clinicMan)
     priority=int(request.POST.get('priority'))
     succeed=cartToOrder(cartObj, priority)
     if succeed:#if suceed to migrate cart to order
-        return HttpResponse("Suceeded")
+        
+        request.session['success']="Order has been submitted!"
+        return redirect('/main/cm_home')
     else:
-        return redirect('/main/cm_cart')
+       
+        request.session['error']="Oh no!"
+        request.session['message']="Failed to submit order"
+        return redirect('/main/cm_home')
 
 def dp_dashboard(request):
+    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     nextOrders=tupleOrder[0]
     remainingQueue=tupleOrder[1]
-    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     context={
                     'nextOrders':nextOrders,
                     'dispatcher':dispatcher,
                     'orderQueue':remainingQueue,
                 }
+    
+    if 'success' in request.session:
+        success=request.session['success']
+        del request.session['success']
+        context['success']=success
+    if 'error' in request.session:
+        error=request.session['error']
+        del request.session['error']
+        context['error']=error
+    if 'message' in request.session:
+        message=request.session['message']
+        del request.session['message']
+        context['message']=message
+
     return render(request, 'main/dp_dashboard.html', context)
 
 def dp_session(request):
+    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     if not ordersToBeProcessed:
+        remainingQueue=tupleOrder[1]
+        request.session['error']="No orders to be dispatched"
         return redirect('/main/dp_dashboard')
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     context={
@@ -227,6 +298,7 @@ def itineraryDownload(request):
     return response
 
 def dp_close_session(request):
+    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     #Fetch the order currently being dispatched
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
@@ -236,19 +308,21 @@ def dp_close_session(request):
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
         order.status=statusToInt("Dispatched")
         order.save()
+        orderRecord.save()
+
     return redirect('/main/dp_dashboard')
 
 def debug(request):
-    # #adding item to cart
-    # clinicMan=ClinicManager.objects.get(pk=2) 
-    # itemObj=ItemCatalogue.objects.get(pk=3)
-    # cartObj=Cart.objects.get(clinicID=clinicMan)
-    # quantity=10
-    # for i in range(quantity):
-    #     itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
-    #     itemInCart.save()
-    del request.session['category']
-    return HttpResponse("all good")
+    # # #adding item to cart
+    # # clinicMan=ClinicManager.objects.get(pk=2) 
+    # # itemObj=ItemCatalogue.objects.get(pk=3)
+    # # cartObj=Cart.objects.get(clinicID=clinicMan)
+    # # quantity=10
+    # # for i in range(quantity):
+    # #     itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
+    # #     itemInCart.save()
+    # del request.session['category']
+    # return HttpResponse("all good")
 
     # ##getWeight()
     # myCart=Cart.objects.get(pk=1)
@@ -269,10 +343,10 @@ def debug(request):
     #     itemInCart[i].delete()
     # return HttpResponse("deleted")
     
-    # #migrate cart to order simulator
-    # cartObj=Cart.objects.get(clinicID__id=3)
-    # priority= priorityToInt("High")
-    # cartToOrder(cartObj, priority)
+    #migrate cart to order simulator
+    cartObj=Cart.objects.get(clinicID__id=3)
+    priority= priorityToInt("High")
+    cartToOrder(cartObj, priority)
 
     # #output all orders
     # orderList=Order.objects.all().order_by('priority','orderDateTime')

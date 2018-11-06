@@ -1,10 +1,10 @@
-from .models import *
 from django.db.models import Q
 import datetime
 from enum import Enum
 from math import sin, cos, atan2, sqrt, pi
 from itertools import permutations
 from sys import float_info
+from .models import *
 
 
 class Priority(Enum):
@@ -69,7 +69,7 @@ def intToStatus(n):
 
 # commit items in cart into order and delete all items in cart
 def cartToOrder(cart, priority):
-    itemsInCart = ItemsInCart.objects.filter(cartID=cart)
+    itemsInCart=ItemsInCart.objects.filter(cartID=cart)
     if not itemsInCart:
         return False
     clinicMan = ClinicManager.objects.get(id=cart.clinicID.id)
@@ -146,3 +146,4 @@ def routePlanner(clinics):
         leg_list.append(leg)
     leg_list.append("(22.269660,114.131303,163)")
     return leg_list
+

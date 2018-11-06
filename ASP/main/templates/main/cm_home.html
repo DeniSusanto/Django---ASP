@@ -19,7 +19,6 @@
 
 <div class="n8_container-flex">
 
-
 {%for item in items%}
     <div class="card n8_card">
     <img class="card-img-top" src="{{item.image.url}}">
@@ -33,7 +32,7 @@
     <div class="card-body n8_card_form">
         <form class="form-inline" action="" method="post">{% csrf_token %}
             <input type="hidden" name="item" value={{item.id}}>
-            <input type="number" name="quantity" min='1' max='99' placeholder=1>&ensp;&ensp;
+            <input type="number" name="quantity" min='1' max='99' value=1>&ensp;&ensp;
             <input class="btn btn-outline-success btn-sm" type="submit" value="Add">
         </form>
     </div>

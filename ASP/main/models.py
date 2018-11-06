@@ -1,5 +1,4 @@
 from django.db import models
-from .helper import *
 
 # Create your models here.
 
@@ -115,8 +114,16 @@ class Order(models.Model):
         return str("Order id:" + str(self.id))
 
     def priorityString(self):
-        return intToPriority(self.priority)
+        n=self.priority
+        if n == 1:
+            return "High"
+        elif n == 2:
+            return "Medium"
+        else:
+            return "Low"
 
+    def weightRound(self):
+        return format(self.weight,'.2f') 
 class ItemsInOrder(models.Model):
     orderID=models.ForeignKey(Order, on_delete=models.CASCADE)
     itemID=models.ForeignKey(ItemCatalogue, on_delete=models.CASCADE)
@@ -130,4 +137,6 @@ class OrderRecord(models.Model):
     dispatchedDateTime=models.DateTimeField()
     deliveredDateTime=models.DateTimeField(blank=True, null=True)
 
+    def __str__(self):
+        return str("Order record of order " + str(self.orderID.id))
 
