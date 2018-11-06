@@ -48,17 +48,24 @@ def loginSimulationDP1(request):
 
 def onlineOrder(request):
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+    allCategories=ItemCategory.objects.all()
     if(request.method=='GET'):#if session has filter request
         if 'category' in request.session:
-            category=request.session['category']
-            categoryObj=ItemCategory.objects.get(pk=category)
-            filteredItems=ItemCatalogue.objects.filter(category=categoryObj)
-            context={
-            'title': "Home",
-            'items':filteredItems,
-            'clinicManager':clinicMan,
-            }
-            return render(request, 'main/cm_home.html', context)
+            category=int(request.session['category'])
+            if not category == -1:
+                categoryObj=ItemCategory.objects.get(pk=category)
+                filteredItems=ItemCatalogue.objects.filter(category=categoryObj)
+                context={
+                'title': "Home",
+                'filter':category,
+                'items':filteredItems,
+                'clinicManager':clinicMan,
+                'allCategories':allCategories,
+                }
+                return render(request, 'main/cm_home.html', context)
+            else:
+                del request.session['category']
+                return redirect('cm_home')
         else:#if session has no filter request
             allItems=ItemCatalogue.objects.all()
             ###Output all item name
@@ -70,7 +77,9 @@ def onlineOrder(request):
             context={
                 'title': "Home",
                 'items':allItems,
-                'clinicManager':clinicMan
+                'clinicManager':clinicMan,
+                'filter':-1,
+                'allCategories':allCategories,
                 }
             return render(request, 'main/cm_home.html', context)
     elif(request.method=='POST'):
@@ -101,12 +110,16 @@ def onlineOrder(request):
                     category=request.session['category']
                     categoryObj=ItemCategory.objects.get(pk=category)
                     theItems=ItemCatalogue.objects.filter(category=categoryObj)
+                    fil=category #there exist filter
                 else:
                     theItems=ItemCatalogue.objects.all()
+                    fil=-1
 
                 context={
                 'title': "Home",
+                'filter': fil,
                 'error':"Order weight limit is reached",
+                'allCategories':allCategories,
                 'clinicManager':clinicMan,
                 'item' : theItems
                 }
@@ -224,14 +237,15 @@ def dp_close_session(request):
     return redirect('/main/dp_dashboard')
 
 def debug(request):
-    #adding item to cart
-    clinicMan=ClinicManager.objects.get(pk=2) 
-    itemObj=ItemCatalogue.objects.get(pk=3)
-    cartObj=Cart.objects.get(clinicID=clinicMan)
-    quantity=10
-    for i in range(quantity):
-        itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
-        itemInCart.save()
+    # #adding item to cart
+    # clinicMan=ClinicManager.objects.get(pk=2) 
+    # itemObj=ItemCatalogue.objects.get(pk=3)
+    # cartObj=Cart.objects.get(clinicID=clinicMan)
+    # quantity=10
+    # for i in range(quantity):
+    #     itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
+    #     itemInCart.save()
+    del request.session['category']
     return HttpResponse("all good")
 
     # ##getWeight()
