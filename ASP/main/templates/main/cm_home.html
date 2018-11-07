@@ -2,19 +2,31 @@
 
 {%block content%}
 <div class="n8_container n8_center_block">
-<form class="form-inline" action="" method="post">{% csrf_token %}
-<div class="form-group mx-sm-3 mb-2">
-    <select class="custom-select mr-sm-2" id="prioritySelection" name="category">
-    <option value=-1>All</option>
-    {%for cat in allCategories%}
-            <option value={{cat.id}}
-            {% if cat.id == filter %} selected {%endif%}
-            >{{cat.name}}</option>
-    {%endfor%}
-    </select>
-</div>
-    <input class="btn btn-primary mb-2" type="submit" value="Browse">
-</form>
+    <form class="form-inline" action="" method="post" style="margin-right:calc(1.5vw + 1.5vh);">{% csrf_token %}
+        <div class="form-group mx-sm-3 mb-2">
+            <select class="custom-select mr-sm-2" id="prioritySelection" name="category">
+            <option value=-1>All</option>
+            {%for cat in allCategories%}
+                    <option value={{cat.id}}
+                    {% if cat.id == filter %} selected {%endif%}
+                    >{{cat.name}}</option>
+            {%endfor%}
+            </select>
+        </div>
+        <input class="btn btn-primary mb-2" type="submit" value="Browse">
+    </form>
+
+    {% comment %} <form action="" method="get" class="form-inline" style="margin-left:calc(1.5vw + 1.5vh);">
+    <div class="form-row align-items-center">
+        <div class="col-auto">
+        <input type="text" class="form-control mb-2" name="search" placeholder="Search Items">
+        </div>
+        <div class="col-auto">
+        <button type="submit" class="btn btn-primary mb-2">Search</button>
+        </div>
+    </div>
+    </form> {% endcomment %}
+
 </div>
 
 <div class="n8_container-flex">
