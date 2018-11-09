@@ -15,7 +15,7 @@ admin.site.register(OrderRecord)
 admin.site.register(Clinic)
 # admin.site.register(WarehousePersonnel)
 # admin.site.register(HospitalAuthority)
-# admin.site.register(Cart)
+admin.site.register(Cart)
 
 #unregister
 admin.site.unregister(User)

@@ -44,7 +44,7 @@ class UserRecord(models.Model):
 class ClinicManager(UserRecord):
     locationID=models.OneToOneField(Clinic, on_delete=models.CASCADE)
     def __str__(self):
-        return str(self.firstName+" " + self.lastName)
+        return str(self.firstName+" " + self.lastName + " from clinic " + self.locationID.name)
 
 class WarehousePersonnel(UserRecord):
     pass
@@ -111,7 +111,7 @@ class Order(models.Model):
     orderDateTime=models.DateTimeField()
 
     def __str__(self):
-        return str("Order id:" + str(self.id))
+        return str("Order id:" + str(self.id) + " belong to " + self.clinicID.fullName())
 
     def priorityString(self):
         n=self.priority
