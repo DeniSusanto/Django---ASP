@@ -147,3 +147,7 @@ def routePlanner(clinics):
     leg_list.append("(22.269660,114.131303,163)")
     return leg_list
 
+def sendDispatchedEmail(orders):
+    for order in orders:
+        cmEmail=order.clinicID.email
+        

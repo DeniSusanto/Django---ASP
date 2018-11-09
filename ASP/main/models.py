@@ -109,6 +109,7 @@ class Order(models.Model):
     status=models.IntegerField()
     priority=models.IntegerField()
     orderDateTime=models.DateTimeField()
+    file=models.FileField(upload_to='orderLabel/', null=True, blank=True)
 
     def __str__(self):
         return str("Order id:" + str(self.id) + " belong to " + self.clinicID.fullName())

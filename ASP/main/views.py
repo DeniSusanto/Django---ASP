@@ -303,6 +303,8 @@ def dp_close_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
+    #send email confirmation to clinic managers
+    sendDispatchedEmail(ordersToBeProcessed)
     #log orders, save it to OrderRecord
     for order in ordersToBeProcessed:
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
