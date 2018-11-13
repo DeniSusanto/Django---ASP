@@ -10,16 +10,7 @@ urlpatterns = [
     url(r'^boredaf$', views.boredaf),
     url(r'^debug$', views.debug),
     ###pls delete###
-
-    ###FOR PARTIAL EXECUTABLE ONLY##
-    url(r'^logincm1$', views.loginSimulationCM1),
-    url(r'^logincm2$', views.loginSimulationCM2),
-    url(r'^logincm3$', views.loginSimulationCM3),
-    url(r'^logincm4$', views.loginSimulationCM4),
-    url(r'^logincm5$', views.loginSimulationCM5),
-    url(r'^logindp1$', views.loginSimulationDP1),
-
-
+    url(r'^login$', views.loginSession, name='loginSession'),
     url(r'^cm_home$', views.onlineOrder, name='cm_home'),
     url(r'^cm_cart$', views.cm_cart, name='cm_cart'),
     url(r'^submitorder$', views.submitorder, name='submitorder'),

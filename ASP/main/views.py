@@ -3,9 +3,11 @@ from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.db.models import Q
 from django.db.models import Count
+from django.contrib import messages
 from .models import *
 from .helper import *
 import csv
+
 
 #global variable
 maxOrderWeight=23.8
@@ -15,36 +17,36 @@ def boredaf(request):
     return redirect('http://www.staggeringbeauty.com/')
 #####DELETE THIS###
 
-def loginSimulationCM1(request):
-    request.session['id']=1
-    cm= ClinicManager.objects.get(pk=1)
-    return redirect('/main/cm_home')
+def loginSession(request):
+    if(request.method=='GET'): #return just the homepage
+        return render(request, 'main/login.html')    
+    else: #process the login
+        uname=request.POST.get('username')
+        pw=request.POST.get('password')
+        cm=ClinicManager.objects.filter(Q(username=uname) & Q(password=pw))
+        wp=WarehousePersonnel.objects.filter(Q(username=uname) & Q(password=pw))
+        dis=Dispatcher.objects.filter(Q(username=uname) & Q(password=pw))
+        ha=HospitalAuthority.objects.filter(Q(username=uname) & Q(password=pw))
+        if cm.count() > 0:
+            request.session['id']=cm[0].id
+            ClinicManager.objects.get(pk=request.session['id'])
+            return redirect('/main/cm_home')
+        elif wp.count() > 0:
+            request.session['id']=wp[0].id
+            WarehousePersonnel.objects.get(pk=request.session['id'])
+            return redirect()    
+        elif dis.count() > 0:
+            request.session['id']=dis[0].id
+            Dispatcher.objects.get(pk=request.session['id'])
+            return redirect('/main/dp_dashboard')    
+        elif ha.count() > 0:
+            request.session['id']=ha[0].id
+            HospitalAuthority.objects.get(pk=request.session['id'])
+            return redirect()
+        else: #data doesnt match any user records
+            messages.error(request,'The Username or Password Entered is Incorrect. Please Try Again.')
+            return redirect('/main/login')
 
-def loginSimulationCM2(request):
-    request.session['id']=2
-    cm= ClinicManager.objects.get(pk=2)
-    return redirect('/main/cm_home')
-
-def loginSimulationCM3(request):
-    request.session['id']=3
-    cm= ClinicManager.objects.get(pk=3)
-    return redirect('/main/cm_home')
-
-def loginSimulationCM4(request):
-    request.session['id']=4
-    cm= ClinicManager.objects.get(pk=4)
-    return redirect('/main/cm_home')
-
-def loginSimulationCM5(request):
-    request.session['id']=5
-    cm= ClinicManager.objects.get(pk=5)
-    return redirect('/main/cm_home')
-
-
-def loginSimulationDP1(request):
-    request.session['id']=1
-    dp= Dispatcher.objects.get(pk=1)
-    return redirect('/main/dp_dashboard')
 
 def onlineOrder(request):
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
