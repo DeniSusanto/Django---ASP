@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-
+            
 class Clinic(models.Model):
     name=models.CharField(max_length=300)
     lat=models.FloatField()
@@ -39,12 +39,14 @@ class UserRecord(models.Model):
         abstract=True
 
     def fullName(self):
-        return self.firstName + " " + self.lastName
+        return self.firstName + " " + self.lastName       
 
 class ClinicManager(UserRecord):
     locationID=models.OneToOneField(Clinic, on_delete=models.CASCADE)
     def __str__(self):
         return str(self.firstName+" " + self.lastName + " from clinic " + self.locationID.name)
+
+
 
 class WarehousePersonnel(UserRecord):
     pass
