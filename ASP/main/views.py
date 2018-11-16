@@ -128,7 +128,8 @@ def loginSession(request):
 def onlineOrder(request):
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
     allCategories=ItemCategory.objects.all()
-    if(request.method=='GET'):#if session has filter request
+    if(request.method=='GET'):
+        #if session has filter request
         if 'category' in request.session:
             category=int(request.session['category'])
             if not category == -1:
@@ -316,34 +317,65 @@ def submitorder(request):
 
 def wp_home(request):
     warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
-    orderQueue = Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    if request.method == 'GET':
+        processing_queue = Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+        packing_queue = Order.objects.filter(status=statusToInt("Processing by Warehouse")).order_by('priority', 'orderDateTime')
+        context = {
+            'processing_queue': processing_queue,
+            'warehouse': warehouse,
+            'packing_queue': packing_queue,
+        }
+
+        if 'success' in request.session:
+            success = request.session['success']
+            del request.session['success']
+            context['success'] = success
+        if 'error' in request.session:
+            error = request.session['error']
+            del request.session['error']
+            context['error'] = error
+        if 'message' in request.session:
+            message = request.session['message']
+            del request.session['message']
+            context['message'] = message
+
+        return render(request, 'main/wp_home.html', context)
+
+    elif request.method == 'POST':
+        order_id = request.POST.get('order')
+        order_type = request.POST.get('type')
+        order = Order.objects.get(pk=order_id)
+
+        if order_type == "process":
+            order.status = statusToInt("Processing by Warehouse")
+            order.save()
+        elif order_type == "dispatch":
+            order.status = statusToInt("Queued for Dispatch")
+            order.save()
+
+        return redirect('/main/wp_home')
+
+
+def dp_session(request):
+    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
-    nextOrders = tupleOrder[0]
-    remainingQueue = tupleOrder[1]
-    context = {
-        'nextOrders': nextOrders,
-        'dispatcher': warehouse,
-        'orderQueue': remainingQueue,
-    }
+    ordersToBeProcessed=tupleOrder[0]
+    if not ordersToBeProcessed:
+        remainingQueue=tupleOrder[1]
+        request.session['error']="No orders to be dispatched"
+        return redirect('/main/dp_dashboard')
+    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
+    context={
+                'nextOrders':ordersToBeProcessed,
+                'dispatcher':dispatcher,
+            }
+    return render(request, 'main/dp_session.html', context)
 
-    if 'success' in request.session:
-        success = request.session['success']
-        del request.session['success']
-        context['success'] = success
-    if 'error' in request.session:
-        error = request.session['error']
-        del request.session['error']
-        context['error'] = error
-    if 'message' in request.session:
-        message = request.session['message']
-        del request.session['message']
-        context['message'] = message
-
-    return render(request, 'main/wp_home.html', context)
 
 def dp_dashboard(request):
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     nextOrders=tupleOrder[0]
     remainingQueue=tupleOrder[1]
@@ -368,24 +400,9 @@ def dp_dashboard(request):
 
     return render(request, 'main/dp_dashboard.html', context)
 
-def dp_session(request):
-    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
-    tupleOrder = dp_nextOrders(orderQueue)
-    ordersToBeProcessed=tupleOrder[0]
-    if not ordersToBeProcessed:
-        remainingQueue=tupleOrder[1]
-        request.session['error']="No orders to be dispatched"
-        return redirect('/main/dp_dashboard')
-    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
-    context={
-                'nextOrders':ordersToBeProcessed,
-                'dispatcher':dispatcher,
-            }
-    return render(request, 'main/dp_session.html', context)
 
 def itineraryDownload(request):
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     clinicIdList=[]
@@ -407,7 +424,7 @@ def itineraryDownload(request):
 def dp_close_session(request):
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     #Fetch the order currently being dispatched
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     #send email confirmation to clinic managers
