@@ -1,5 +1,13 @@
 {% extends "main/wp_base.html" %}
 
 {% block content %}
-    <h2>Hello World!</h2>
+    <h3>Order #{{ order_id }} details</h3>
+    Ordered by: {{ cm_name }} <br>
+    From: {{ clinic }} <br>
+    <br>
+    <strong>Ordered items: </strong> <br>
+    {% for item in items_list %}
+        {{ item.itemID.name }} <br>
+    {% endfor %}
+
 {% endblock %}

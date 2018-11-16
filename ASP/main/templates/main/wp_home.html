@@ -1,4 +1,5 @@
 {% extends "main/wp_base.html" %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 
 {% block content %}
     <div class="container">
@@ -21,7 +22,11 @@
                 {% for order in processing_queue %}
                     <tr>
                         <td>
-                            <a href="{%url "order_details"%}"> {{ order.id }} </a>
+                            <form name="form-order" method="post" action="{% url 'order_details' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value={{ order.id }}/>
+                                <button type="button" class="btn btn-link" onclick="form.submit()">{{ order.id }}</button>
+                            </form>
                         </td>
                         <td>{{ order.priorityString }}</td>
                         <td>{{ order.weightRound }} kg</td>
@@ -60,7 +65,14 @@
                 </thead>
                 {% for order in packing_queue %}
                     <tr>
-                        <td>{{ order.id }}</td>
+                        <td>
+                            <form name="form-order" method="post" action="{% url 'order_details' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value={{ order.id }}/>
+                                <a href="{% url 'order_details' %}"
+                                   onclick="document.forms[0].submit();return false;">{{ order.id }}</a>
+                            </form>
+                        </td>
                         <td>{{ order.priorityString }}</td>
                         <td>{{ order.weightRound }}</td>
                         <td>{{ order.orderDateTime }}</td>

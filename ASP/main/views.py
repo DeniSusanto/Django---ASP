@@ -357,11 +357,23 @@ def wp_home(request):
 
 
 def order_details(request):
-    warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
-    context = {
-        'warehouse': warehouse,
-    }
-    return render(request, 'main/order_details.html', context)
+    if request.method == 'POST':
+        warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
+        order_id = request.POST.get('id')
+        order_id = int(order_id[:-1])
+        clinic_manager = Order.objects.get(pk=order_id).clinicID
+        clinic = Clinic.objects.get(pk=clinic_manager.pk).name
+        items_list = ItemsInOrder.objects.filter(orderID=order_id)
+        context = {
+            'warehouse': warehouse,
+            'order_id': order_id,
+            'cm_name': clinic_manager.firstName + " " + clinic_manager.lastName,
+            'clinic': clinic,
+            'items_list': items_list,
+        }
+        return render(request, 'main/order_details.html', context)
+    else:
+        return redirect('/main/wp_home')
 
 
 def dp_session(request):
