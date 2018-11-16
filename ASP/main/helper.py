@@ -5,6 +5,8 @@ from math import sin, cos, atan2, sqrt, pi
 from itertools import permutations
 from sys import float_info
 from .models import *
+from django.shortcuts import redirect
+from django.db.models import Q
 
 
 class Priority(Enum):
@@ -138,3 +140,19 @@ def sendDispatchedEmail(orders):
     for order in orders:
         cmEmail=order.clinicID.email
         
+def userLogout(request):
+    keys=[]
+    for key, value in request.session.items():
+        keys.append(key)
+    for key in keys:
+        del request.session[key]
+
+def redirectToHome(role):
+    if role=='cm':
+        return redirect('/main/cm_home')
+    elif role=='dp':
+        return redirect('/main/dp_dashboard')
+    elif role=='wp':
+        pass
+    elif role=='ha':
+        pass

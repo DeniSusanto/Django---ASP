@@ -95,38 +95,42 @@ def registration(request):
             
 
 def loginSession(request):
-    if(request.method=='GET'): #return just the homepage
-        return render(request, 'main/login.html')    
-    else: #process the login
-        uname=request.POST.get('username')
-        pw=request.POST.get('password')
-        cm=ClinicManager.objects.filter(Q(username=uname) & Q(password=pw))
-        wp=WarehousePersonnel.objects.filter(Q(username=uname) & Q(password=pw))
-        dis=Dispatcher.objects.filter(Q(username=uname) & Q(password=pw))
-        ha=HospitalAuthority.objects.filter(Q(username=uname) & Q(password=pw))
-        if cm.count() > 0:
-            request.session['id']=cm[0].id
-            request.session['role']="cm"
-            ClinicManager.objects.get(pk=request.session['id'])
-            return redirect('/main/cm_home')
-        elif wp.count() > 0:
-            request.session['id']=wp[0].id
-            request.session['role']="wp"
-            WarehousePersonnel.objects.get(pk=request.session['id'])
-            return redirect()    
-        elif dis.count() > 0:
-            request.session['id']=dis[0].id
-            request.session['role']="dp"
-            Dispatcher.objects.get(pk=request.session['id'])
-            return redirect('/main/dp_dashboard')    
-        elif ha.count() > 0:
-            request.session['id']=ha[0].id
-            request.session['role']="ha"
-            HospitalAuthority.objects.get(pk=request.session['id'])
-            return redirect()
-        else: #data doesnt match any user records
-            messages.error(request,'The Username or Password Entered is Incorrect. Please Try Again.')
-            return redirect('/main/login')
+    if 'id' in request.session and 'role' in request.session:
+        role=request.session['role']
+        return redirectToHome(role)
+    else:    
+        if(request.method=='GET'): #return just the homepage
+            return render(request, 'main/login.html')    
+        else: #process the login
+            uname=request.POST.get('username')
+            pw=request.POST.get('password')
+            cm=ClinicManager.objects.filter(Q(username=uname) & Q(password=pw))
+            wp=WarehousePersonnel.objects.filter(Q(username=uname) & Q(password=pw))
+            dis=Dispatcher.objects.filter(Q(username=uname) & Q(password=pw))
+            ha=HospitalAuthority.objects.filter(Q(username=uname) & Q(password=pw))
+            if cm.count() > 0:
+                request.session['id']=cm[0].id
+                request.session['role']="cm"
+                ClinicManager.objects.get(pk=request.session['id'])
+                return redirect('/main/cm_home')
+            elif wp.count() > 0:
+                request.session['id']=wp[0].id
+                request.session['role']="wp"
+                WarehousePersonnel.objects.get(pk=request.session['id'])
+                return redirect()    
+            elif dis.count() > 0:
+                request.session['id']=dis[0].id
+                request.session['role']="dp"
+                Dispatcher.objects.get(pk=request.session['id'])
+                return redirect('/main/dp_dashboard')    
+            elif ha.count() > 0:
+                request.session['id']=ha[0].id
+                request.session['role']="ha"
+                HospitalAuthority.objects.get(pk=request.session['id'])
+                return redirect()
+            else: #data doesnt match any user records
+                messages.error(request,'The Username or Password Entered is Incorrect. Please Try Again.')
+                return redirect('/main/login')
 
 
 def onlineOrder(request):
@@ -397,6 +401,10 @@ def dp_close_session(request):
 
     return redirect('/main/dp_dashboard')
 
+def logout(request):
+    userLogout(request)
+    return redirect('/main/login')
+
 def debug(request):
     # # #adding item to cart
     # # clinicMan=ClinicManager.objects.get(pk=2) 
@@ -475,12 +483,18 @@ def debug(request):
     # order=Order.objects.get(pk=38)
     # return HttpResponse(order.getItemQuantity(10))
 
-    #get clinic distance from another clinic
-    clinic= Clinic.objects.get(pk=1)
-    target=Clinic.objects.get(pk=2)
-    return HttpResponse(clinic.calc_dist(target))
+    # #get clinic distance from another clinic
+    # clinic= Clinic.objects.get(pk=1)
+    # target=Clinic.objects.get(pk=2)
+    # return HttpResponse(clinic.calc_dist(target))
 
-    return redirect('/main/logincm')
+    #delete all sessions
+    keys=[]
+    for key, value in request.session.items():
+        keys.append(key)
+    for key in keys:
+        del request.session[key]
+    return redirect('/main/login')
     #return HttpResponse(datetime.datetime.now())
 
     pass
