@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^submitorder$', views.submitorder, name='submitorder'),
     url(r'^wp_home$', views.wp_home, name='wp_home'),
     url(r'^order_details$', views.order_details, name='order_details'),
+    url(r'^pdf_download$', views.pdf_download, name='pdf_download'),
     url(r'^dp_dashboard$', views.dp_dashboard, name='dp_dashboard'),
     url(r'^dp_session$', views.dp_session, name='dp_session'),
     url(r'^itinerary_download$', views.itineraryDownload, name='itinerary_download'),

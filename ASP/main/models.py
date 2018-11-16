@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import Q
 from math import sin, cos, atan2, sqrt, pi
-from main import helper
 # Create your models here.
             
 class Clinic(models.Model):
@@ -160,7 +159,16 @@ class Order(models.Model):
             return "Low"
 
     def str_status(self):
-        return helper.intToStatus(self.status)
+        if self.status == 1:
+            return "Queued for Processing"
+        elif self.status == 2:
+            return "Processing by Warehouse"
+        elif self.status == 3:
+            return "Queued for Dispatch"
+        elif self.status == 4:
+            return "Dispatched"
+        else:
+            return "Delivered"
 
     def weightRound(self):
         return format(self.weight,'.2f') 

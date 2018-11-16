@@ -1,11 +1,13 @@
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, HttpResponseForbidden
+from django.http import Http404, HttpResponse, HttpResponseForbidden, FileResponse
 from django.shortcuts import redirect
 from django.db.models import Q
 from django.db.models import Count
 from django.contrib import messages
 from .models import *
 from .helper import *
+from reportlab.pdfgen import canvas
+from io import BytesIO
 import csv
 
 
@@ -389,6 +391,25 @@ def order_details(request):
         return render(request, 'main/order_details.html', context)
     else:
         return redirect('/main/wp_home')
+
+
+def pdf_download(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="test.pdf"'
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer)
+
+    p.drawString(250, 500, 'Hello world.')
+
+    p.showPage()
+    p.save()
+
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+
+    return response
 
 
 def dp_session(request):
