@@ -97,7 +97,7 @@ def registration(request):
 def loginSession(request):
     if 'id' in request.session and 'role' in request.session:
         role=request.session['role']
-        return redirectToHome(role)
+        return redirectToHome(request)
     else:    
         if(request.method=='GET'): #return just the homepage
             return render(request, 'main/login.html')    
@@ -134,6 +134,9 @@ def loginSession(request):
 
 
 def onlineOrder(request):
+    if not isUserPermitted(request,'cm'):
+        return redirectToHome(request)
+    
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
     allCategories=ItemCategory.objects.all()
     if(request.method=='GET'):#if session has filter request
@@ -257,6 +260,9 @@ def onlineOrder(request):
             
 
 def cm_cart(request):
+    if not isUserPermitted(request,'cm'):
+        return redirectToHome(request)
+    
     if request.method=='GET':
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
         cartObj=Cart.objects.get(clinicID=clinicMan)
@@ -306,6 +312,9 @@ def cm_cart(request):
 
 
 def submitorder(request):
+    if not isUserPermitted(request,'cm'):
+        return redirectToHome(request)
+    
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
     allCategories=ItemCategory.objects.all()
     cartObj=Cart.objects.get(clinicID=clinicMan)
@@ -322,6 +331,9 @@ def submitorder(request):
         return redirect('/main/cm_home')
 
 def dp_dashboard(request):
+    if not isUserPermitted(request,'dp'):
+        return redirectToHome(request)
+    
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
@@ -349,6 +361,9 @@ def dp_dashboard(request):
     return render(request, 'main/dp_dashboard.html', context)
 
 def dp_session(request):
+    if not isUserPermitted(request,'dp'):
+        return redirectToHome(request)
+    
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
@@ -365,6 +380,9 @@ def dp_session(request):
     return render(request, 'main/dp_session.html', context)
 
 def itineraryDownload(request):
+    if not isUserPermitted(request,'dp'):
+        return redirectToHome(request)
+    
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
@@ -385,6 +403,9 @@ def itineraryDownload(request):
     return response
 
 def dp_close_session(request):
+    if not isUserPermitted(request,'dp'):
+        return redirectToHome(request)
+    
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     #Fetch the order currently being dispatched
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')

@@ -147,12 +147,23 @@ def userLogout(request):
     for key in keys:
         del request.session[key]
 
-def redirectToHome(role):
-    if role=='cm':
-        return redirect('/main/cm_home')
-    elif role=='dp':
-        return redirect('/main/dp_dashboard')
-    elif role=='wp':
-        pass
-    elif role=='ha':
-        pass
+def redirectToHome(request):
+    if 'role' in request.session:
+        role=request.session['role']
+        if role=='cm':
+            return redirect('/main/cm_home')
+        elif role=='dp':
+            return redirect('/main/dp_dashboard')
+        elif role=='wp':
+            pass
+        elif role=='ha':
+            pass
+    else:
+        return redirect('/main/login')
+
+def isUserPermitted(request, targetRole):
+    userRole=request.session['role']
+    if userRole != targetRole:
+        return False
+    else:
+        return True
