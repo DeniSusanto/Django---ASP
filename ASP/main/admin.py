@@ -10,7 +10,7 @@ admin.site.register(Order)
 admin.site.register(OrderRecord)
 
 # #temporarily ommited from admin panel
-# admin.site.register(ItemCatalogue)
+admin.site.register(ItemCatalogue)
 # admin.site.register(ItemCategory)
 admin.site.register(Clinic)
 # admin.site.register(WarehousePersonnel)

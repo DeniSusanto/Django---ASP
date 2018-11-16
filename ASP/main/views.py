@@ -347,10 +347,11 @@ def debug(request):
     #     itemInCart[i].delete()
     # return HttpResponse("deleted")
     
-    #migrate cart to order simulator
-    cartObj=Cart.objects.get(clinicID__id=3)
-    priority= priorityToInt("High")
-    cartToOrder(cartObj, priority)
+    # #migrate cart to order simulator
+    # cartObj=Cart.objects.get(clinicID__id=3)
+    # priority= priorityToInt("High")
+    # cartToOrder(cartObj, priority)
+
 
     # #output all orders
     # orderList=Order.objects.all().order_by('priority','orderDateTime')
@@ -388,6 +389,16 @@ def debug(request):
     #     name+=str(order.id)
     #     name+="<br>"
     # return HttpResponse(name)
+
+    # #get item quantity in order
+    # order=Order.objects.get(pk=38)
+    # return HttpResponse(order.getItemQuantity(10))
+
+    #get clinic distance from another clinic
+    clinic= Clinic.objects.get(pk=1)
+    target=Clinic.objects.get(pk=2)
+    return HttpResponse(clinic.calc_dist(target))
+
     return redirect('/main/logincm')
     #return HttpResponse(datetime.datetime.now())
 

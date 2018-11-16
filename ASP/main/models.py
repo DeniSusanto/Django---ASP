@@ -1,15 +1,34 @@
 from django.db import models
+from django.db.models import Q
+from math import sin, cos, atan2, sqrt, pi
+from itertools import permutations
+from sys import float_info
 
 # Create your models here.
             
 class Clinic(models.Model):
-    name=models.CharField(max_length=300)
+    name=models.CharField(max_length=300, unique=True)
     lat=models.FloatField()
     longitude=models.FloatField()
     alt=models.IntegerField()
 
     def __str__(self):
         return str(self.name)
+    
+    def calc_dist(self, target):
+        lat1=self.lat
+        long1=self.longitude
+
+        lat2=target.lat
+        long2=target.longitude
+        
+        rad = pi / 180.0
+        d_long = (long2 - long1) * rad
+        d_lat = (lat2 - lat1) * rad
+        a = pow(sin(d_lat / 2.0), 2) + cos(lat1 * rad) * cos(lat2 * rad) * pow(sin(d_long / 2.0), 2)
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        distance = 6371 * c
+        return distance
 
 class ItemCategory(models.Model):
     name=models.CharField(max_length=100)
@@ -25,7 +44,7 @@ class ItemCatalogue(models.Model):
     description=models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return str(self.name)
+        return str("ID: " + str(self.id) + " " + self.name)
 
 class UserRecord(models.Model):
     firstName=models.CharField(max_length=100)
@@ -127,6 +146,11 @@ class Order(models.Model):
 
     def weightRound(self):
         return format(self.weight,'.2f') 
+    
+    def getItemQuantity(self, itemID):
+        if ItemsInOrder.objects.filter(Q(itemID=itemID) & Q(orderID=self.id)).count()>0:
+            return ItemsInOrder.objects.filter(Q(itemID=itemID) & Q(orderID=self.id)).count()
+
 class ItemsInOrder(models.Model):
     orderID=models.ForeignKey(Order, on_delete=models.CASCADE)
     itemID=models.ForeignKey(ItemCatalogue, on_delete=models.CASCADE)
