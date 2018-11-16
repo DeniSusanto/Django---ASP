@@ -1,9 +1,7 @@
 from django.db import models
 from django.db.models import Q
 from math import sin, cos, atan2, sqrt, pi
-from itertools import permutations
-from sys import float_info
-
+from main import helper
 # Create your models here.
             
 class Clinic(models.Model):
@@ -59,6 +57,9 @@ class ItemCatalogue(models.Model):
 
     def __str__(self):
         return str("ID: " + str(self.id) + " " + self.name)
+
+    def get_id(self):
+        return str(self.id)
 
 class UserRecord(models.Model):
     firstName=models.CharField(max_length=100)
@@ -157,6 +158,9 @@ class Order(models.Model):
             return "Medium"
         else:
             return "Low"
+
+    def str_status(self):
+        return helper.intToStatus(self.status)
 
     def weightRound(self):
         return format(self.weight,'.2f') 

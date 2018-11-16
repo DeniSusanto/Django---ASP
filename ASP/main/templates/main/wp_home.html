@@ -16,6 +16,7 @@
                     <th>Priority</th>
                     <th>Weight</th>
                     <th>Date & Time</th>
+                    <th>Status</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -31,6 +32,7 @@
                         <td>{{ order.priorityString }}</td>
                         <td>{{ order.weightRound }} kg</td>
                         <td>{{ order.orderDateTime }}</td>
+                        <td>{{ order.str_status}} </td>
                         <td>
                             <div class="card-body n8_card_form">
                                 <form class="form-inline" action="" method="post">{% csrf_token %}
@@ -60,6 +62,7 @@
                     <th>Priority</th>
                     <th>Weight</th>
                     <th>Date & Time</th>
+                    <th>Status</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -75,6 +78,7 @@
                         <td>{{ order.priorityString }}</td>
                         <td>{{ order.weightRound }}</td>
                         <td>{{ order.orderDateTime }}</td>
+                        <td>{{ order.str_status}} </td>
                         <td>
                             <div class="card-body n8_card_form">
                                 <form class="form-inline" action="" method="post">{% csrf_token %}

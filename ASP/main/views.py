@@ -361,15 +361,30 @@ def order_details(request):
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
         order_id = request.POST.get('id')
         order_id = int(order_id[:-1])
+        order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
         clinic = Clinic.objects.get(pk=clinic_manager.pk).name
         items_list = ItemsInOrder.objects.filter(orderID=order_id)
+
+        class ItemDetails:
+            def __init__(self, item_id, name, quantity):
+                self.item_id = item_id
+                self.name = name
+                self.quantity = quantity
+
+        item_details_list = []
+
+        for item in items_list:
+            temp = Order.objects.filter(pk=order_id)
+            item_quantity = temp[0].getItemQuantity(item.itemID.get_id())
+            item_details_list.append(ItemDetails(item.itemID.get_id(), item.itemID.name, item_quantity))
+
         context = {
             'warehouse': warehouse,
-            'order_id': order_id,
-            'cm_name': clinic_manager.firstName + " " + clinic_manager.lastName,
+            'order': order,
+            'cm': clinic_manager,
             'clinic': clinic,
-            'items_list': items_list,
+            'item_details': item_details_list,
         }
         return render(request, 'main/order_details.html', context)
     else:
