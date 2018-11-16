@@ -46,7 +46,7 @@ class Token(models.Model):
         return ret_email'''
 
     def __str__(self):
-      return str(self.email)
+      return str(self.token+": "+self.email)
    
 
 class ItemCategory(models.Model):
