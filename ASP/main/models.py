@@ -30,6 +30,20 @@ class Clinic(models.Model):
         distance = 6371 * c
         return distance
 
+class Token(models.Model):
+    def id_generator():
+        return get_random_string(length=6)
+    email=models.EmailField(max_length=254, unique=True)
+    token=models.CharField(max_length=10,default=id_generator,editable=False)
+
+    '''def getEmail(self):
+        ret_email=Token.objects.filter(token=self)
+        return ret_email'''
+
+    def __str__(self):
+      return str(self.email)
+   
+
 class ItemCategory(models.Model):
     name=models.CharField(max_length=100)
 
@@ -52,7 +66,7 @@ class UserRecord(models.Model):
     username=models.CharField(max_length=250, unique=True)
     password=models.CharField(max_length=100)
     email=models.EmailField(max_length=254, unique=True)
-    image=models.ImageField(upload_to="profilePic/", blank=True, null=True, default='profilePic/noUserPic.png')
+    #image=models.ImageField(upload_to="profilePic/", blank=True, null=True, default='profilePic/noUserPic.png')
 
     class Meta:
         abstract=True

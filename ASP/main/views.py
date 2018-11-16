@@ -17,6 +17,83 @@ def boredaf(request):
     return redirect('http://www.staggeringbeauty.com/')
 #####DELETE THIS###
 
+def preRegistration(request):
+    token=request.GET.get('token')
+    counter = Token.objects.filter(token=token).count()
+    
+    if (request.method=='POST'):
+        userType =request.POST.get('userType')
+        url = "main/registration?token="+token+"&userType="+userType
+        return redirect(url)
+        
+    else:
+        if counter == 1:
+            return render(request,'main/preregistration.html')
+        else:
+            return redirect('http://www.staggeringbeauty.com/')
+
+def registration(request):
+    userType = int(request.GET.get('userType'))
+    token=request.GET.get('token')
+    url = "main/registration?token="+token+"&userType="+str(userType)
+    if(request.method=='POST'):
+        
+        dummy= Token.objects.filter(token=token)
+        email = ""
+        for data in dummy:
+            email = data.email
+        
+        firstName=request.POST.get('firstName')
+        lastName =request.POST.get('lastName')
+        username =request.POST.get('username')
+        password =request.POST.get('password')
+
+        context ={
+                    'firstName' : firstName,
+                    'lastName'  : lastName,
+                    'username'  : username,
+                    'password'  : password,
+                    'error'     : True,
+                }
+        if(userType==1):
+            userCounter = ClinicManager.objects.filter(username=username).count()
+            if (userCounter == 1):
+                return render(request,url,context)
+            location     = int(request.POST.get('location'))
+            clinic = Clinic.objects.filter(id=location)
+            for something in clinic:
+                ClinicManager(firstName=firstName,lastName=lastName,username=username,password=password,email=email,locationID=something).save()
+        else:
+            if(userType==2):
+                userCounter = WarehousePersonnel.objects.filter(username=username).count()
+                if (userCounter == 1):
+                    return render(request,'main/registration.html',context)
+                WarehousePersonnel(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
+            elif(userType==3):
+                userCounter = Dispatcher.objects.filter(username=username).count()
+                if (userCounter == 1):
+                    return render(request,url,context)
+                Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
+            elif(userType==4):
+                userCounter = HospitalAuthority.objects.filter(username=username).count()
+                if (userCounter == 1):
+                    return render(request,url,context)
+                HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
+        #image    =request.POST.get('image')
+        Token.objects.filter(token=token).delete()
+        return redirect('http://www.google.com')
+       
+    else :
+        if(userType==1):
+            allLocations = Clinic.objects.all()
+            context ={
+                'allLocations' : allLocations,
+                'isCM' : True
+            }
+            return render(request,'main/registration.html',context)
+        return render(request,'main/registration.html')
+            
+
 def loginSession(request):
     if(request.method=='GET'): #return just the homepage
         return render(request, 'main/login.html')    
