@@ -136,9 +136,9 @@ def routePlanner(clinics):
     leg_list.append("(" + str.format('{0:.6f}', queen_mary.lat) + "," + str.format('{0:.6f}', queen_mary.longitude) + "," + str(queen_mary.alt) + ")")
     return leg_list
 
-def sendDispatchedEmail(orders):
-    for order in orders:
-        cmEmail=order.clinicID.email
+# def sendDispatchedEmail(orders):
+#     for order in orders:
+#         cmEmail=order.clinicID.email
         
 def userLogout(request):
     keys=[]
