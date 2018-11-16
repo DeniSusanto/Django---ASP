@@ -106,22 +106,9 @@ def dp_nextOrders(allOrders):
     return (orderToLoad, remainingOrder)
 
 
-# Calculate distance of 2 places from their latitude and longitude
-def calc_dist(lat1, long1, lat2, long2):
-    rad = pi / 180.0
-    d_long = (long2 - long1) * rad
-    d_lat = (lat2 - lat1) * rad
-    a = pow(sin(d_lat / 2.0), 2) + cos(lat1 * rad) * cos(lat2 * rad) * pow(sin(d_long / 2.0), 2)
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    distance = 6371 * c
-    return distance
-
-
 # return a list of string where each element represent a string of the leg information
 def routePlanner(clinics):
-    # Queen Mary hospital detail: Lat. 22.243243, Long. 114.153765
-    qm_lat = 22.243243
-    qm_long = 114.153765
+    queen_mary = Clinic(name="Queen Mary Hospital", lat=22.269660, longitude=114.131303, alt=163)
 
     all_routes = list(permutations(clinics))
     best_route = ()
@@ -132,19 +119,19 @@ def routePlanner(clinics):
         for i in range(len(route)):
             route_name.append(route[i].name)
             if i == 0:
-                dist += calc_dist(qm_lat, qm_long, route[i].lat, route[i].longitude)
+                dist += queen_mary.calc_dist(route[i])
             else:
-                dist += calc_dist(route[i - 1].lat, route[i - 1].longitude, route[i].lat, route[i].longitude)
-        dist += calc_dist(route[len(route) - 1].lat, route[len(route) - 1].longitude, qm_lat, qm_long)
+                dist += route[i-1].calc_dist(route[i])
+        dist += route[len(route) - 1].calc_dist(queen_mary)
         if dist < best_dist:
             best_dist = dist
             best_route = route
 
     leg_list = []
     for i in range(len(best_route)):
-        leg = "(" + str(best_route[i - 1].lat) + "," + str(best_route[i].longitude) + "," + str(best_route[i].alt) + ")"
+        leg = "(" + str.format('{0:.6f}', best_route[i - 1].lat) + "," + str.format('{0:.6f}', best_route[i].longitude) + "," + str(best_route[i].alt) + ")"
         leg_list.append(leg)
-    leg_list.append("(22.269660,114.131303,163)")
+    leg_list.append("(" + str.format('{0:.6f}', queen_mary.lat) + "," + str.format('{0:.6f}', queen_mary.longitude) + "," + str(queen_mary.alt) + ")")
     return leg_list
 
 def sendDispatchedEmail(orders):
