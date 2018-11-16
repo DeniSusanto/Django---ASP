@@ -20,7 +20,9 @@
                 </thead>
                 {% for order in processing_queue %}
                     <tr>
-                        <td>{{ order.id }}</td>
+                        <td>
+                            <a href="{%url "order_details"%}"> {{ order.id }} </a>
+                        </td>
                         <td>{{ order.priorityString }}</td>
                         <td>{{ order.weightRound }} kg</td>
                         <td>{{ order.orderDateTime }}</td>
@@ -42,7 +44,7 @@
     <div class="container">
         <div class="row">
             <div class="n8_content_title-big" style="margin-bottom: calc(1vw + 1vh);color:#bc1602;">
-                Packing in progress
+                Packing in Progress
             </div>
         </div>
         <div class="row">

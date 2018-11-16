@@ -356,6 +356,14 @@ def wp_home(request):
         return redirect('/main/wp_home')
 
 
+def order_details(request):
+    warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
+    context = {
+        'warehouse': warehouse,
+    }
+    return render(request, 'main/order_details.html', context)
+
+
 def dp_session(request):
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
