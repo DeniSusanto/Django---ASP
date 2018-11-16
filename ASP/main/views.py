@@ -53,7 +53,7 @@ def registration(request):
                     'lastName'  : lastName,
                     'username'  : username,
                     'password'  : password,
-                    'error'     : True,
+                    'error'     : 1,
                 }
         if(userType==1):
             userCounter = ClinicManager.objects.filter(username=username).count()
