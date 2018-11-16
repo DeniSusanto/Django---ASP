@@ -34,19 +34,6 @@ class Clinic(models.Model):
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
         distance = 6371 * c
         return distance
-
-class Token(models.Model):
-    def id_generator():
-        return get_random_string(length=6)
-    email=models.EmailField(max_length=254, unique=True)
-    token=models.CharField(max_length=10,default=id_generator,editable=False)
-
-    '''def getEmail(self):
-        ret_email=Token.objects.filter(token=self)
-        return ret_email'''
-
-    def __str__(self):
-      return str(self.token+": "+self.email)
    
 
 class ItemCategory(models.Model):
