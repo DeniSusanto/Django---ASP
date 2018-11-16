@@ -106,18 +106,22 @@ def loginSession(request):
         ha=HospitalAuthority.objects.filter(Q(username=uname) & Q(password=pw))
         if cm.count() > 0:
             request.session['id']=cm[0].id
+            request.session['role']="cm"
             ClinicManager.objects.get(pk=request.session['id'])
             return redirect('/main/cm_home')
         elif wp.count() > 0:
             request.session['id']=wp[0].id
+            request.session['role']="wp"
             WarehousePersonnel.objects.get(pk=request.session['id'])
             return redirect()    
         elif dis.count() > 0:
             request.session['id']=dis[0].id
+            request.session['role']="dp"
             Dispatcher.objects.get(pk=request.session['id'])
             return redirect('/main/dp_dashboard')    
         elif ha.count() > 0:
             request.session['id']=ha[0].id
+            request.session['role']="ha"
             HospitalAuthority.objects.get(pk=request.session['id'])
             return redirect()
         else: #data doesnt match any user records
