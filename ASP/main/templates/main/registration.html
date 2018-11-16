@@ -27,11 +27,12 @@
             </button>
         </nav>
 
-        <div class="container h-100 d-flex justify-content-center">
+        <div class="container d-flex justify-content-center">
             <div class="jumbotron my-auto">
-            {%if error%}
-                <h1>Username already exists.</h1>
-            {%endif%}
+                {%if error%}
+                    <center><font color="red">Username already exists</font></center>
+                {%endif%}
+                <br>
             <form class="form-inline" action="" method="post">{% csrf_token %}
                 <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
                     <tr><td>First Name:</td><td><input type="text" name="firstName" value={{firstName}}></td></tr>
