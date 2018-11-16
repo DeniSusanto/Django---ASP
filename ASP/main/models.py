@@ -1,4 +1,9 @@
 from django.db import models
+import uuid
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+import base64
+import os
 from django.db.models import Q
 from math import sin, cos, atan2, sqrt, pi
 from itertools import permutations
@@ -134,8 +139,17 @@ class ItemsInCart(models.Model):
         return str(self.cartID.clinicID.firstName + " " + self.cartID.clinicID.lastName + "'s cart: " + self.itemID.name)
 
 class Token(models.Model):
-    token=models.CharField(max_length=250)
-    email=models.EmailField(max_length=254)
+    def id_generator():
+        return get_random_string(length=6)
+    email=models.EmailField(max_length=254, unique=True)
+    token=models.CharField(max_length=10,default=id_generator,editable=False)
+
+    '''def getEmail(self):
+        ret_email=Token.objects.filter(token=self)
+        return ret_email'''
+
+    def __str__(self):
+      return str(self.email)
 
 class Order(models.Model):
     clinicID=models.ForeignKey(ClinicManager, on_delete=models.CASCADE)
