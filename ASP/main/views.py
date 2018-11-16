@@ -81,7 +81,7 @@ def registration(request):
                 HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
         #image    =request.POST.get('image')
         Token.objects.filter(token=token).delete()
-        return redirect('http://www.google.com')
+        return render(request,'main/login.html')
        
     else :
         if(userType==1):
