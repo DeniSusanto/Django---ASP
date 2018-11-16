@@ -13,7 +13,7 @@ admin.site.register(OrderRecord)
 admin.site.register(ItemCatalogue)
 # admin.site.register(ItemCategory)
 admin.site.register(Clinic)
-# admin.site.register(WarehousePersonnel)
+admin.site.register(WarehousePersonnel)
 # admin.site.register(HospitalAuthority)
 admin.site.register(Cart)
 

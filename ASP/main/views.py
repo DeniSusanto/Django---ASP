@@ -111,7 +111,7 @@ def loginSession(request):
         elif wp.count() > 0:
             request.session['id']=wp[0].id
             WarehousePersonnel.objects.get(pk=request.session['id'])
-            return redirect()    
+            return redirect('/main/wp_home')
         elif dis.count() > 0:
             request.session['id']=dis[0].id
             Dispatcher.objects.get(pk=request.session['id'])
@@ -312,6 +312,34 @@ def submitorder(request):
         request.session['error']="Oh no!"
         request.session['message']="Failed to submit order"
         return redirect('/main/cm_home')
+
+
+def wp_home(request):
+    warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
+    orderQueue = Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    tupleOrder = dp_nextOrders(orderQueue)
+    nextOrders = tupleOrder[0]
+    remainingQueue = tupleOrder[1]
+    context = {
+        'nextOrders': nextOrders,
+        'dispatcher': warehouse,
+        'orderQueue': remainingQueue,
+    }
+
+    if 'success' in request.session:
+        success = request.session['success']
+        del request.session['success']
+        context['success'] = success
+    if 'error' in request.session:
+        error = request.session['error']
+        del request.session['error']
+        context['error'] = error
+    if 'message' in request.session:
+        message = request.session['message']
+        del request.session['message']
+        context['message'] = message
+
+    return render(request, 'main/wp_home.html', context)
 
 def dp_dashboard(request):
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
