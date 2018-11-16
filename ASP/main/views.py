@@ -72,12 +72,12 @@ def registration(request):
             elif(userType==3):
                 userCounter = Dispatcher.objects.filter(username=username).count()
                 if (userCounter == 1):
-                    return render(request,url,context)
+                    return render(request,'main/registration.html',context)
                 Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
             elif(userType==4):
                 userCounter = HospitalAuthority.objects.filter(username=username).count()
                 if (userCounter == 1):
-                    return render(request,url,context)
+                    return render(request,'main/registration.html',context)
                 HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
         #image    =request.POST.get('image')
         Token.objects.filter(token=token).delete()
