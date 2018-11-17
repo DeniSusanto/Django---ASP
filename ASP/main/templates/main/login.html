@@ -29,16 +29,17 @@
         {% for message in messages %}
             <div class="alert alert-dismissible">
                 <a class="close" href="/main/login" data-dismiss="alert" aria-label="Close">×</a>
-                    {{ message }}
+                <center><font color="red">{{ message }}</font></center>
             </div>
         {% endfor %}    
-        <div class="container justify-content-center">
+        <div class="container d-flex justify-content-center">
             <div class="jumbotron my-auto">
             <form class="form-inline" action='{%url "loginSession"%}' method='POST'>{% csrf_token %}
                 <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
+                <tr><td colspan='2'><center><h2>Login</h2></center></td></tr>
                 <tr><td>Username:</td><td><input type="text" name="username" value="{{username}}"></td></tr>
                 <tr><td>Password:</td><td><input type="password" name="password" value="{{password}}"></td></tr>
-                <tr><td class="align-right"><input class="btn btn-outline-danger btn-sm" type="submit" value="Login"></td></tr>
+                <tr><td colspan='2'><center><input class="btn btn-light" type="submit" value="Login"></center></td></tr>
                 </table>
             </form>  
             </div>  

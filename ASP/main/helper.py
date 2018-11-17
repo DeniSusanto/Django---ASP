@@ -5,6 +5,8 @@ from math import sin, cos, atan2, sqrt, pi
 from itertools import permutations
 from sys import float_info
 from .models import *
+from django.shortcuts import redirect
+from django.db.models import Q
 
 
 class Priority(Enum):
@@ -134,7 +136,36 @@ def routePlanner(clinics):
     leg_list.append("(" + str.format('{0:.6f}', queen_mary.lat) + "," + str.format('{0:.6f}', queen_mary.longitude) + "," + str(queen_mary.alt) + ")")
     return leg_list
 
-def sendDispatchedEmail(orders):
-    for order in orders:
-        cmEmail=order.clinicID.email
+# def sendDispatchedEmail(orders):
+#     for order in orders:
+#         cmEmail=order.clinicID.email
         
+def userLogout(request):
+    # keys=[]
+    # for key, value in request.session.items():
+    #     keys.append(key)
+    # for key in keys:
+    #     del request.session[key]
+    del request.session['id']
+    del request.session['role']
+
+def redirectToHome(request):
+    if 'role' in request.session:
+        role=request.session['role']
+        if role=='cm':
+            return redirect('/main/cm_home')
+        elif role=='dp':
+            return redirect('/main/dp_dashboard')
+        elif role=='wp':
+            pass
+        elif role=='ha':
+            pass
+    else:
+        return redirect('/main/login')
+
+def isUserPermitted(request, targetRole):
+    userRole=request.session['role']
+    if userRole != targetRole:
+        return False
+    else:
+        return True
