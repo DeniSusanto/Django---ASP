@@ -1,0 +1,68 @@
+{% extends "main/wp_base.html" %}
+
+{% block content %}
+    {% load static %}
+    <div class="container">
+
+        <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
+            <div class="row">
+                <div class="n8_content_title-big" style="margin-bottom: calc(1vw + 1vh);color:#bc1602;">
+                    Order #{{ order.id }} details
+                </div>
+            </div>
+            <div class="col-md6"><a href="{% url "wp_home" %}">
+
+                {% if type == 'process' %}
+                    <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
+                        <input type="hidden" name="order" value={{ order.id }}>
+                        <input type="hidden" name="type" value="process">
+                        <input class="btn btn-outline-success btn-sm" type="submit" value="Begin Processing">
+                    </form>
+                {% else %}
+                    <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
+                        <input type="hidden" name="order" value={{ order.id }}>
+                        <input type="hidden" name="type" value="dispatch">
+                        <input class="btn btn-outline-success btn-sm" type="submit" value="Confirm Completion">
+                    </form>
+                {% endif %}
+            </a>
+            </div>
+        </div>
+
+
+        Ordered by: {{ cm.firstName }} {{ cm.lastName }} <br>
+        From: {{ clinic.name }} <br>
+        Priority: {{ order.priorityString }} <br>
+        Weight: {{ order.weightRound }} kg<br>
+        <br>
+        <strong>Ordered items: </strong> <br>
+
+        <div class="row">
+            <table class="table table-hover">
+                <thead class="thead-light">
+                <tr>
+                    <th>Item ID</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                </tr>
+                </thead>
+                {% for item in item_details %}
+                    <tr>
+                        <td>{{ item.item_id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div style="display: inline-block; float: right;margin-right:calc(0.5vw + 0.5vh);">
+            <form class="form-inline" action="{% url "pdf_download" %}" method="post">{% csrf_token %}
+                        <input type="hidden" name="id" value={{ order.id }}>
+                        <input class="btn btn-outline-success btn-sm" type="submit" value="Download Shipping Label">
+                    </form>
+        </div>
+    </div>
+
+
+{% endblock %}
