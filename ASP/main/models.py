@@ -129,6 +129,7 @@ class Token(models.Model):
     def id_generator():
         return get_random_string(length=6)
     email=models.EmailField(max_length=254, unique=True)
+    role=models.IntegerField()
     token=models.CharField(max_length=10,default=id_generator,editable=False)
 
     '''def getEmail(self):
