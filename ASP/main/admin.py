@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import *
 from django.contrib.auth.models import Group, User
+from django.core.exceptions import ValidationError
+from django.contrib import messages
+from django.urls import reverse
 
 admin.site.register(ClinicManager)
 admin.site.register(Dispatcher)
@@ -19,6 +22,8 @@ admin.site.register(Cart)
 
 
 class TokenAdmin(admin.ModelAdmin):
+    def response_add(self, request, obj, post_url_continue=None):
+        return self.response_post_save_add(request, obj)
     def save_model(self,request,obj,form,change):
         emailExist = ClinicManager.objects.filter(email=obj.email).count() + WarehousePersonnel.objects.filter(email=obj.email).count() + Dispatcher.objects.filter(email=obj.email).count() +  HospitalAuthority.objects.filter(email=obj.email).count()
         if emailExist == 1:
