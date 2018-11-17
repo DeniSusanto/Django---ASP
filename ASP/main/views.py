@@ -7,6 +7,8 @@ from django.contrib import messages
 from .models import *
 from .helper import *
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, portrait
+from reportlab.platypus import Image
 from io import BytesIO
 import csv
 
@@ -355,6 +357,7 @@ def wp_home(request):
             order.status = statusToInt("Queued for Dispatch")
             order.save()
 
+        request.session['success'] = "Order has been updated!"
         return redirect('/main/wp_home')
 
 
@@ -362,7 +365,8 @@ def order_details(request):
     if request.method == 'POST':
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
         order_id = request.POST.get('id')
-        order_id = int(order_id[:-1])
+        type = request.POST.get('type')
+        # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
         clinic = Clinic.objects.get(pk=clinic_manager.pk).name
@@ -384,26 +388,31 @@ def order_details(request):
         context = {
             'warehouse': warehouse,
             'order': order,
+            'type': type,
             'cm': clinic_manager,
             'clinic': clinic,
             'item_details': item_details_list,
         }
         return render(request, 'main/order_details.html', context)
     else:
+        request.session['error'] = "Oh no!"
+        request.session['message'] = "Failed to view order"
         return redirect('/main/wp_home')
 
 
 def pdf_download(request):
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="test.pdf"'
+    response['Content-Disposition'] = 'inline; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
 
     buffer = BytesIO()
-    p = canvas.Canvas(buffer)
+    c = canvas.Canvas(buffer, pagesize=portrait(letter))
 
-    p.drawString(250, 500, 'Hello world.')
+    # header text
+    c.setFont('Helvetica', 35, leading=None)
+    c.drawCentredString(310, 700, 'Hello world!')
 
-    p.showPage()
-    p.save()
+    c.showPage()
+    c.save()
 
     pdf = buffer.getvalue()
     buffer.close()

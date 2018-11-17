@@ -11,9 +11,24 @@
                 </div>
             </div>
             <div class="col-md6"><a href="{% url "wp_home" %}">
-                <button type="button" class="btn btn-primary nav8_eclipse_btn n8_content_sub_title">
-                    Back to Home
-                </button>
+
+                {% if type == 'process' %}
+                    <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
+                        <input type="hidden" name="order" value={{ order.id }}>
+                        <input type="hidden" name="type" value="process">
+                        <input class="btn btn-outline-success btn-sm" type="submit" value="Begin Processing">
+                    </form>
+                {% else %}
+                    <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
+                        <input type="hidden" name="order" value={{ order.id }}>
+                        <input type="hidden" name="type" value="dispatch">
+                        <input class="btn btn-outline-success btn-sm" type="submit" value="Confirm Completion">
+                    </form>
+                {% endif %}
+
+                {#                <button type="button" class="btn btn-primary nav8_eclipse_btn n8_content_sub_title">#}
+                {#                    Begin Processing#}
+                {#                </button>#}
             </a>
             </div>
         </div>
@@ -47,7 +62,7 @@
 
         <div style="display: inline-block; float: right;margin-right:calc(0.5vw + 0.5vh);">
             <a href="{% url 'pdf_download' %}"><img src="{% static 'main/download.png' %}" width="30" height="30"
-                                                          title="Download PDF"></a>
+                                                    title="Download PDF"></a>
         </div>
     </div>
 

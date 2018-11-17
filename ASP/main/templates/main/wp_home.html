@@ -5,7 +5,7 @@
     <div class="container">
         <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
             <div class="col-md6 n8_content_title-big" style="color: #45b7a7;">
-                Queued for Processing
+                Queued for Packing
             </div>
         </div>
         <div class="row">
@@ -23,11 +23,12 @@
                 {% for order in processing_queue %}
                     <tr>
                         <td>
-                            <form name="form-order" method="post" action="{% url 'order_details' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="id" value={{ order.id }}/>
-                                <button type="button" class="btn btn-link" onclick="form.submit()">{{ order.id }}</button>
-                            </form>
+{#                            <form name="form-order" method="post" action="{% url 'order_details' %}">#}
+{#                                {% csrf_token %}#}
+{#                                <input type="hidden" name="id" value={{ order.id }}/>#}
+{#                                <button type="button" class="btn btn-link" onclick="form.submit()">{{ order.id }}</button>#}
+{#                            </form>#}
+                            {{ order.id }}
                         </td>
                         <td>{{ order.priorityString }}</td>
                         <td>{{ order.weightRound }} kg</td>
@@ -35,8 +36,8 @@
                         <td>{{ order.str_status}} </td>
                         <td>
                             <div class="card-body n8_card_form">
-                                <form class="form-inline" action="" method="post">{% csrf_token %}
-                                    <input type="hidden" name="order" value={{ order.id }}>
+                                <form class="form-inline" action="{% url 'order_details' %}" method="post">{% csrf_token %}
+                                    <input type="hidden" name="id" value={{ order.id }}>
                                     <input type="hidden" name="type" value="process">
                                     <input class="btn btn-outline-success btn-sm" type="submit" value="Process">
                                 </form>
@@ -69,11 +70,12 @@
                 {% for order in packing_queue %}
                     <tr>
                         <td>
-                            <form name="form-order" method="post" action="{% url 'order_details' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="id" value={{ order.id }}/>
-                                <button type="button" class="btn btn-link" onclick="form.submit()">{{ order.id }}</button>
-                            </form>
+{#                            <form name="form-order" method="post" action="{% url 'order_details' %}">#}
+{#                                {% csrf_token %}#}
+{#                                <input type="hidden" name="id" value={{ order.id }}/>#}
+{#                                <button type="button" class="btn btn-link" onclick="form.submit()">{{ order.id }}</button>#}
+{#                            </form>#}
+                            {{ order.id }}
                         </td>
                         <td>{{ order.priorityString }}</td>
                         <td>{{ order.weightRound }}</td>
@@ -81,8 +83,8 @@
                         <td>{{ order.str_status}} </td>
                         <td>
                             <div class="card-body n8_card_form">
-                                <form class="form-inline" action="" method="post">{% csrf_token %}
-                                    <input type="hidden" name="order" value={{ order.id }}>
+                                <form class="form-inline" action="{% url 'order_details' %}" method="post">{% csrf_token %}
+                                    <input type="hidden" name="id" value={{ order.id }}>
                                     <input type="hidden" name="type" value="dispatch">
                                     <input class="btn btn-outline-success btn-sm" type="submit" value="Complete">
                                 </form>
