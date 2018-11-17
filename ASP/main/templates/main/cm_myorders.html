@@ -40,7 +40,7 @@
                         <td>
                         {%if order.6 == "cancel"%}
                         <a href="{%url "deleteOrder"%}?order={{order.0}}">
-                            <button type="button" class="btn btn-primary nav8_eclipse_btn n8_content_sub_title" data-toggle="confirmation">
+                            <button type="button" class="btn btn-primary nav8_eclipse_btn n8_content_sub_title" data-toggle="confirmation" data-title="Are you sure to cancel order?">
                                 Cancel order
                             </button>
                         </a>
