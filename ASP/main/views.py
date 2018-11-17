@@ -453,8 +453,9 @@ def myorders(request):
         finishedOrders.append(orderTup)
 
     context={
-                'openOrders':ordersToBeProcessed,
-                'orderHistory':dispatcher,
+                'openOrders':openOrders,
+                'orderHistory':finishedOrders,
+                'clinicManager':clinicMan,
             }
     return render(request, 'main/cm_myorders.html', context)
     

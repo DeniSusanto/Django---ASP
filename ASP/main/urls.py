@@ -12,7 +12,6 @@ urlpatterns = [
     ###pls delete###
 
     #General
-    url(r'preregistration$',views.preRegistration),
     url(r'registration$',views.registration),
     url(r'^login$', views.loginSession, name='loginSession'),
     url(r'^logout$', views.logout, name='logout'),
