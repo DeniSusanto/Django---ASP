@@ -28,7 +28,7 @@ class TokenAdmin(admin.ModelAdmin):
             email = []
             email.append(obj.email)
             token = obj.token
-            content = 'Here is your link for registration http://127.0.0.1:8000/main/preregistration?token=' + str(token) +'\n'
+            content = 'Here is your link for registration http://127.0.0.1:8000/main/registration?token=' + str(token) +'\n'
 
             send_mail('Token Registration',content,'navig8.comp3297@gmail.com',email,fail_silently=False,)
             return super(TokenAdmin,self).save_model(request,obj,form,change)
