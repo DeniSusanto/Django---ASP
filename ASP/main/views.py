@@ -561,6 +561,8 @@ def dp_dashboard(request):
         del request.session['message']
         context['message'] = message
 
+    return render(request, 'main/dp_dashboard.html', context)
+
 def dp_session(request):
     if not isUserPermitted(request,'dp'):
         return redirectToHome(request)
