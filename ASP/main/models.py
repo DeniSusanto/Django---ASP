@@ -57,8 +57,8 @@ class ItemCatalogue(models.Model):
     def __str__(self):
         return str("ID: " + str(self.id) + " " + self.name)
 
-    def get_id(self):
-        return str(self.id)
+    def get_name(self):
+        return str(self.name)
 
 class UserRecord(models.Model):
     firstName=models.CharField(max_length=100)

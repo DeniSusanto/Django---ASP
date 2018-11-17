@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, portrait
 from reportlab.platypus import Image
 from io import BytesIO
+from collections import OrderedDict
 import csv
 
 
@@ -365,8 +366,47 @@ def order_details(request):
     if request.method == 'POST':
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
         order_id = request.POST.get('id')
-        type = request.POST.get('type')
+        order_type = request.POST.get('type')
         # order_id = int(order_id[:-1])
+        order = Order.objects.get(pk=order_id)
+        clinic_manager = Order.objects.get(pk=order_id).clinicID
+        clinic = Clinic.objects.get(pk=clinic_manager.pk).name
+        items_list = ItemsInOrder.objects.filter(orderID=order_id).values_list('itemID', flat=True).distinct()
+
+        class ItemDetails:
+            def __init__(self, item_id, name, quantity):
+                self.item_id = item_id
+                self.name = name
+                self.quantity = quantity
+
+        item_details_list = []
+
+        for item in items_list:
+            temp = Order.objects.filter(pk=order_id)
+            item_name = ItemCatalogue.objects.get(pk=item).get_name()
+            item_quantity = temp[0].getItemQuantity(item)
+            item_details_list.append(ItemDetails(item, item_name, item_quantity))
+
+        item_details_list = list(OrderedDict.fromkeys(item_details_list))
+
+        context = {
+            'warehouse': warehouse,
+            'order': order,
+            'type': order_type,
+            'cm': clinic_manager,
+            'clinic': clinic,
+            'item_details': item_details_list,
+        }
+        return render(request, 'main/order_details.html', context)
+    else:
+        request.session['error'] = "Oh no!"
+        request.session['message'] = "Failed to view order"
+        return redirect('/main/wp_home')
+
+
+def pdf_download(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('id')
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
         clinic = Clinic.objects.get(pk=clinic_manager.pk).name
@@ -385,40 +425,34 @@ def order_details(request):
             item_quantity = temp[0].getItemQuantity(item.itemID.get_id())
             item_details_list.append(ItemDetails(item.itemID.get_id(), item.itemID.name, item_quantity))
 
-        context = {
-            'warehouse': warehouse,
-            'order': order,
-            'type': type,
-            'cm': clinic_manager,
-            'clinic': clinic,
-            'item_details': item_details_list,
-        }
-        return render(request, 'main/order_details.html', context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
+
+        buffer = BytesIO()
+        c = canvas.Canvas(buffer, pagesize=portrait(letter))
+
+        # Text begins here
+        c.setFont('Helvetica', 30, leading=None)
+        if order.priority == 1:
+            c.drawCentredString(310, 700, "ASP HIGH-PRIORITY PKG")
+        elif order.priority == 2:
+            c.drawCentredString(310, 700, "ASP MEDIUM-PRIORITY PKG")
+        else:
+            c.drawCentredString(310, 700, "ASP LOW-PRIORITY PKG")
+
+        c.showPage()
+        c.save()
+
+        pdf = buffer.getvalue()
+        buffer.close()
+        response.write(pdf)
+
+        return response
+
     else:
         request.session['error'] = "Oh no!"
         request.session['message'] = "Failed to view order"
         return redirect('/main/wp_home')
-
-
-def pdf_download(request):
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
-
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=portrait(letter))
-
-    # header text
-    c.setFont('Helvetica', 35, leading=None)
-    c.drawCentredString(310, 700, 'Hello world!')
-
-    c.showPage()
-    c.save()
-
-    pdf = buffer.getvalue()
-    buffer.close()
-    response.write(pdf)
-
-    return response
 
 
 def dp_session(request):
