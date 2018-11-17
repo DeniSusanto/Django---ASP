@@ -433,7 +433,7 @@ def pdf_download(request):
 
         buffer = BytesIO()
         c = canvas.Canvas(buffer, pagesize=portrait(letter))
-
+        c.setTitle("order"+str(order_id))
         # Borders
         c.line(60, 720, 550, 720)
         c.line(60, 720, 60, 50)
@@ -448,6 +448,7 @@ def pdf_download(request):
         c.line(220, 595, 220, 720)  # Vertical line
         c.setFont('Helvetica', 12, leading=None)
         print_time = str(datetime.date.today())
+        c.drawRightString(540, 700, "Order #"+str(order_id))
         c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
         c.drawString(230, 685, "Processed on: " + print_time)
         c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
@@ -496,17 +497,14 @@ def pdf_download(request):
 
         table.setStyle(TableStyle(
             [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-             # ('FONTSIZE', (0, 0), (-1, 0), 16),  # Table head
-             # ('FONTSIZE', (0, 1), (-1, -1), 14),  # Table contents
-             # ('FONT', (0, 0), (-1, 0), 'Times-Bold'),
-             # ('FONT', (0, 1), (-1, -1), 'Times-Roman'),
              ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
-             #('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+             ('VALIGN', (0, 0), (-1, 0), 'TOP'),
+             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
              ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
 
-        # table.wrapOn(c, width, height)
         table.wrapOn(c, width, height)
-        table.drawOn(c, 80, 450)
+        table.wrapOn(c, width, height)
+        table.drawOn(c, 80, 300)
 
         c.showPage()
         c.save()
