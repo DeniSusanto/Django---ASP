@@ -21,6 +21,8 @@ urlpatterns = [
     url(r'^cm_cart$', views.cm_cart, name='cm_cart'),
     url(r'^submitorder$', views.submitorder, name='submitorder'),
     url(r'^myorders$', views.myorders, name='myorders'),
+    url(r'^deleteOrder$', views.deleteOrder, name='deleteOrder'),
+    url(r'^confirmReceived$', views.confirmReceived, name='confirmReceived'),
 
     #DP
     url(r'^dp_dashboard$', views.dp_dashboard, name='dp_dashboard'),

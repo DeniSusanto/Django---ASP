@@ -264,7 +264,7 @@ def cm_cart(request):
         #itemsCartList=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').distinct().order_by('itemID')
         itemsInCart=[]
         for item in itemsCount:
-            itemName=ItemCatalogue.objects.get(pk=item['itemID'])
+            itemName=(ItemCatalogue.objects.get(pk=item['itemID'])).name
             tup=(item['itemID'],itemName, item['total'])
             itemsInCart.append(tup)
         
@@ -316,7 +316,7 @@ def submitorder(request):
     if succeed:#if suceed to migrate cart to order
         
         request.session['success']="Order has been submitted!"
-        return redirect('/main/cm_home')
+        return redirect('/main/myorders')
     else:
        
         request.session['error']="Oh no!"
@@ -426,11 +426,12 @@ def myorders(request):
     openOrdersObj=Order.objects.filter(Q(clinicID=clinicMan) & ~Q(status=5)).order_by('-orderDateTime')
     openOrders=[] #tuples lists
     for order in openOrdersObj:
-        itemsObj=ItemsInOrder.objects.filter(orderID=order)
+        itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
         itemsTup=[]
-        for item in itemsObj:
-            itemQuantity=order.getItemQuantity(item.itemID.id)
-            tup=(item.itemID.name, itemQuantity)
+        for itemid in itemsObj:
+            item=ItemCatalogue.objects.get(pk=itemid['itemID'])
+            itemQuantity=order.getItemQuantity(item)
+            tup=(item.name, itemQuantity)
             itemsTup.append(tup)
         if order.status==1:
             action="cancel"
@@ -444,25 +445,53 @@ def myorders(request):
     finishedOrdersObj=Order.objects.filter(Q(clinicID=clinicMan) & Q(status=5)).order_by('-orderDateTime')
     finishedOrders=[] #tuples list
     for order in finishedOrdersObj:
-        itemsObj=ItemsInOrder.objects.filter(orderID=order)
+        itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
         itemsTup=[]
-        for item in itemsObj:
-            itemQuantity=order.getItemQuantity(item.itemID.id)
-            tup=(item.itemID.name, itemQuantity)
+        for itemid in itemsObj:
+            item=ItemCatalogue.objects.get(pk=itemid['itemID'])
+            itemQuantity=order.getItemQuantity(item)
+            tup=(item.name, itemQuantity)
             itemsTup.append(tup)
         recordObj=OrderRecord.objects.get(orderID=order)
         orderTup=(order.id, intToPriority(order.priority), itemsTup, format(order.weight,'.2f'), order.orderDateTime, recordObj.deliveredDateTime)
         finishedOrders.append(orderTup)
-
+    
     context={
                 'openOrders':openOrders,
                 'orderHistory':finishedOrders,
                 'clinicManager':clinicMan,
             }
+    if 'success' in request.session:
+        success=request.session['success']
+        del request.session['success']
+        context['success']=success
+    if 'error' in request.session:
+        error=request.session['error']
+        del request.session['error']
+        context['error']=error
+    if 'message' in request.session:
+        message=request.session['message']
+        del request.session['message']
+        context['message']=message       
     return render(request, 'main/cm_myorders.html', context)
     
+def deleteOrder(request):
+    orderID=int(request.GET.get('order'))
+    order=Order.objects.get(pk=orderID)
+    order.delete()
+    return redirect('/main/myorders')
 
+def confirmReceived(request):
+    orderID=int(request.GET.get('order'))
+    order=Order.objects.get(pk=orderID)
+    order.status=statusToInt("Delivered")
+    order.save()
 
+    record=OrderRecord.objects.get(orderID=order)
+    record.deliveredDateTime=datetime.datetime.now()
+    record.save()
+
+    return redirect('/main/myorders')
 
 def debug(request):
     # # #adding item to cart
@@ -547,6 +576,8 @@ def debug(request):
     # target=Clinic.objects.get(pk=2)
     # return HttpResponse(clinic.calc_dist(target))
 
+    del request.session['success']
+    return HttpResponse("ok")
     #delete all sessions
     keys=[]
     for key, value in request.session.items():
