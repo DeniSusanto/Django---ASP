@@ -434,9 +434,11 @@ def myorders(request):
             itemsTup.append(tup)
         if order.status==1:
             action="cancel"
+        elif order.status==4:
+            action="confirm"
         else:
             action="none"
-        orderTup=(order.id, intToStatus(order.status),intToPriority(order.priority), itemsTup, order.weight, order.orderDateTime, action)
+        orderTup=(order.id, intToStatus(order.status),intToPriority(order.priority), itemsTup, format(order.weight,'.2f'), order.orderDateTime, action)
         openOrders.append(orderTup)
 
     finishedOrdersObj=Order.objects.filter(Q(clinicID=clinicMan) & Q(status=5)).order_by('-orderDateTime')
@@ -449,7 +451,7 @@ def myorders(request):
             tup=(item.itemID.name, itemQuantity)
             itemsTup.append(tup)
         recordObj=OrderRecord.objects.get(orderID=order)
-        orderTup=(order.id, intToPriority(order.priority), itemsTup, order.weight, order.orderDateTime, recordObj.deliveredDateTime)
+        orderTup=(order.id, intToPriority(order.priority), itemsTup, format(order.weight,'.2f'), order.orderDateTime, recordObj.deliveredDateTime)
         finishedOrders.append(orderTup)
 
     context={

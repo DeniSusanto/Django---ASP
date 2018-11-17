@@ -22,13 +22,13 @@
                     </thead>
                     {%for order in openOrders%}
                     <tr>
+                        <td>{{order.0}}</td>
                         <td>{{order.1}}</td>
                         <td>{{order.2}}</td>
-                        <td>{{order.3}} kg</td>
-                        <td>{{order.4.1.1}} with quantity: {{order.4.1.2}} </td>
-                        <td>{{order.5}} kg</td>
+                        <td>{{order.3.1.0}} with quantity: {{order.3.1.1}} </td>
+                        <td>{{order.4}} kg</td>
+                        <td>{{order.5}}</td>
                         <td>{{order.6}}</td>
-                        <td>{{order.7}}</td>
                     </tr>
                     {%endfor%}
                 </table>
@@ -55,12 +55,12 @@
                     </thead>
                    {%for order in orderHistory%}
                     <tr>
+                        <td>{{order.0}}</td>
                         <td>{{order.1}}</td>
-                        <td>{{order.2}}</td>
-                        <td>{{order.3.1.1}} with quantity: {{order.3.1.2}}</td>
+                        <td>{{order.2.1.0}} with quantity: {{order.2.1.1}}</td>
+                        <td>{{order.3}}</td>
                         <td>{{order.4}}</td>
                         <td>{{order.5}}</td>
-                        <td>{{order.6}}</td>
                     </tr>
                     {%endfor%}
                 </table>
