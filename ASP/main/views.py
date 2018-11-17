@@ -335,7 +335,7 @@ def dp_dashboard(request):
         return redirectToHome(request)
     
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     nextOrders=tupleOrder[0]
     remainingQueue=tupleOrder[1]
@@ -365,7 +365,7 @@ def dp_session(request):
         return redirectToHome(request)
     
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     if not ordersToBeProcessed:
@@ -383,7 +383,7 @@ def itineraryDownload(request):
     if not isUserPermitted(request,'dp'):
         return redirectToHome(request)
     
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     clinicIdList=[]
@@ -408,7 +408,7 @@ def dp_close_session(request):
     
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     #Fetch the order currently being dispatched
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     #send email confirmation to clinic managers
@@ -425,6 +425,48 @@ def dp_close_session(request):
 def logout(request):
     userLogout(request)
     return redirect('/main/login')
+
+def myorders(request):
+    if not isUserPermitted(request,'cm'):
+        return redirectToHome(request)
+    clinicMan= ClinicManager.objects.get(pk=request.session['id'])
+    openOrdersObj=Order.objects.filter(Q(clinicID=clinicMan) & ~Q(status=5)).order_by('-orderDateTime')
+    openOrders=[] #tuples lists
+    for order in openOrdersObj:
+        itemsObj=ItemsInOrder.objects.filter(orderID=order)
+        itemsTup=[]
+        for item in itemsObj:
+            itemQuantity=order.getItemQuantity(item.itemID.id)
+            tup=(item.itemID.name, itemQuantity)
+            itemsTup.append(tup)
+        if order.status==1:
+            action="cancel"
+        else:
+            action="none"
+        orderTup=(order.id, intToStatus(order.status),intToPriority(order.priority), itemsTup, order.weight, order.orderDateTime, action)
+        openOrders.append(orderTup)
+
+    finishedOrdersObj=Order.objects.filter(Q(clinicID=clinicMan) & Q(status=5)).order_by('-orderDateTime')
+    finishedOrders=[] #tuples list
+    for order in finishedOrdersObj:
+        itemsObj=ItemsInOrder.objects.filter(orderID=order)
+        itemsTup=[]
+        for item in itemsObj:
+            itemQuantity=order.getItemQuantity(item.itemID.id)
+            tup=(item.itemID.name, itemQuantity)
+            itemsTup.append(tup)
+        recordObj=OrderRecord.objects.get(orderID=order)
+        orderTup=(order.id, intToPriority(order.priority), itemsTup, order.weight, order.orderDateTime, recordObj.deliveredDateTime)
+        finishedOrders.append(orderTup)
+
+    context={
+                'openOrders':ordersToBeProcessed,
+                'orderHistory':dispatcher,
+            }
+    return render(request, 'main/cm_myorders.html', context)
+    
+
+
 
 def debug(request):
     # # #adding item to cart

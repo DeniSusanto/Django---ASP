@@ -1,0 +1,66 @@
+{%extends "main/cm_base.html"%}
+
+{%block content%}
+<div class="container" > 
+            <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
+                <div class="col-md6 n8_content_title-big" style ="color: #45b7a7;">
+                    Open Orders
+                </div>
+            </div>
+            <div class="row">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Items</th>
+                            <th>Weight</th>
+                            <th>Order Placed</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    {%for order in nextOrders%}
+                    <tr>
+                        <td>{{order.id}}</td>
+                        <td>{{order.priorityString}}</td>
+                        <td>{{order.priorityString}}</td>
+                        <td>{{order.weightRound}} kg</td>
+                        <td>{{order.orderDateTime}}</td>
+                        <td>{{order.priorityString}}</td>
+                    </tr>
+                    {%endfor%}
+                </table>
+            </div>
+    </div>
+    <br><br><br><br>
+    <div class="container">    
+            <div class="row">
+                <div class="n8_content_title-big" style="margin-bottom: calc(1vw + 1vh);color:#bc1602;">
+                    Order Received History
+                </div>
+            </div>
+            <div class="row">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Priority</th>
+                            <th>Items</th>
+                            <th>Weight</th>
+                            <th>Order Placed</th>
+                            <th>Order Received</th>
+                        </tr>
+                    </thead>
+                   {%for order in orderQueue%}
+                    <tr>
+                        <td>{{order.id}}</td>
+                        <td>{{order.priorityString}}</td>
+                        <td>{{order.weightRound}}</td>
+                        <td>{{order.orderDateTime}}</td>
+                    </tr>
+                    {%endfor%}
+                </table>
+            </div>
+    </div>
+{%endblock%}
