@@ -119,7 +119,7 @@ def loginSession(request):
                 request.session['id']=wp[0].id
                 request.session['role']="wp"
                 WarehousePersonnel.objects.get(pk=request.session['id'])
-                return redirect()
+                return redirect('/main/wp_home')
             elif dis.count() > 0:
                 request.session['id']=dis[0].id
                 request.session['role']="dp"
@@ -332,35 +332,11 @@ def submitorder(request):
         request.session['message']="Failed to submit order"
         return redirect('/main/cm_home')
 
-def dp_dashboard(request):
-    if not isUserPermitted(request,'dp'):
-        return redirectToHome(request)
-
-    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
-    tupleOrder = dp_nextOrders(orderQueue)
-    nextOrders=tupleOrder[0]
-    remainingQueue=tupleOrder[1]
-    context={
-                    'nextOrders':nextOrders,
-                    'dispatcher':dispatcher,
-                    'orderQueue':remainingQueue,
-                }
-    
-    if 'success' in request.session:
-        success=request.session['success']
-        del request.session['success']
-        context['success']=success
-    if 'error' in request.session:
-        error=request.session['error']
-        del request.session['error']
-        context['error']=error
-    if 'message' in request.session:
-        message=request.session['message']
-        del request.session['message']
-        context['message']=message
 
 def wp_home(request):
+    if not isUserPermitted(request, 'wp'):
+        return redirectToHome(request)
+
     warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
     if request.method == 'GET':
         processing_queue = Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
@@ -477,8 +453,8 @@ def pdf_download(request):
         c.line(550, 720, 550, 50)
 
         # Need to change path
-        path = r'C:\Users\Kevin Hung\Documents\_Projects\Unchained\ASP\main\qm_logo.jpg'
-        c.drawImage(path, 80, 610, width=120, height=100)
+        #path = r'C:\Users\Kevin Hung\Documents\_Projects\Unchained\ASP\main\qm_logo.jpg'
+        #c.drawImage(path, 80, 610, width=120, height=100)
 
         c.line(60, 595, 550, 595)  # Horizontal line
         c.line(220, 595, 220, 720)  # Vertical line
@@ -556,6 +532,34 @@ def pdf_download(request):
         request.session['message'] = "Failed to view order"
         return redirect('/main/wp_home')
 
+
+def dp_dashboard(request):
+    if not isUserPermitted(request, 'dp'):
+        return redirectToHome(request)
+
+    dispatcher = Dispatcher.objects.get(pk=request.session['id'])
+    orderQueue = Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
+    tupleOrder = dp_nextOrders(orderQueue)
+    nextOrders = tupleOrder[0]
+    remainingQueue = tupleOrder[1]
+    context = {
+        'nextOrders': nextOrders,
+        'dispatcher': dispatcher,
+        'orderQueue': remainingQueue,
+    }
+
+    if 'success' in request.session:
+        success = request.session['success']
+        del request.session['success']
+        context['success'] = success
+    if 'error' in request.session:
+        error = request.session['error']
+        del request.session['error']
+        context['error'] = error
+    if 'message' in request.session:
+        message = request.session['message']
+        del request.session['message']
+        context['message'] = message
 
 def dp_session(request):
     if not isUserPermitted(request,'dp'):
