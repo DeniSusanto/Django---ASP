@@ -10,7 +10,6 @@ urlpatterns = [
     url(r'^boredaf$', views.boredaf),
     url(r'^debug$', views.debug),
     ###pls delete###
-    url(r'preregistration$',views.preRegistration),
     url(r'registration$',views.registration),
     url(r'^login$', views.loginSession, name='loginSession'),
     url(r'^cm_home$', views.onlineOrder, name='cm_home'),
