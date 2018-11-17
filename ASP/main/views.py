@@ -409,7 +409,7 @@ def pdf_download(request):
         # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
-        clinic = Clinic.objects.get(pk=clinic_manager.pk).name
+        clinic = Clinic.objects.get(pk=clinic_manager.pk)
         items_list = ItemsInOrder.objects.filter(orderID=order_id).values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
@@ -435,22 +435,26 @@ def pdf_download(request):
 
         # Borders
         c.line(60, 720, 550, 720)
-        c.line(60, 720, 60, 100)
-        c.line(60, 100, 550, 100)
-        c.line(550, 720, 550, 100)
+        c.line(60, 720, 60, 50)
+        c.line(60, 50, 550, 50)
+        c.line(550, 720, 550, 50)
 
         # Need to change path
         path = r'C:\Users\Kevin Hung\Documents\_Projects\Unchained\ASP\main\qm_logo.jpg'
-        c.drawImage(path, 85, 580, width=140, height=120)
+        c.drawImage(path, 80, 610, width=120, height=100)
 
-        c.line(60, 560, 550, 560)
-        c.line(250, 560, 250, 720)
+        c.line(60, 595, 550, 595)  # Horizontal line
+        c.line(220, 595, 220, 720)  # Vertical line
         c.setFont('Helvetica', 12, leading=None)
         print_time = str(datetime.date.today())
-        c.drawString(260, 700, "Ordered on: " + str(order.orderDateTime.date()))
-        c.drawString(260, 680, "Processed on: " + print_time)
+        c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
+        c.drawString(230, 685, "Processed on: " + print_time)
+        c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
+        c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
+        c.drawString(307, 640, "(22.269660, 114.131303, 163)")
+        c.line(220, 630, 550, 630)
 
-        c.setFont('Helvetica', 30, leading=None)
+        c.setFont('Helvetica', 23, leading=None)
         if order.priority == 1:
             package_title = "ASP HIGH-PRIORITY PKG"
         elif order.priority == 2:
@@ -458,8 +462,14 @@ def pdf_download(request):
         else:
             package_title = "ASP LOW-PRIORITY PKG"
 
-        c.drawCentredString(310, 520, package_title)
-        c.line(60, 500, 550, 500)
+        c.drawCentredString(385, 605, package_title)
+
+        c.setFont('Helvetica', 15, leading=None)
+        c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
+        c.drawString(138, 555, clinic.name)
+        c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
+
+        c.line(60, 525, 550, 525)
 
         c.showPage()
         c.save()
