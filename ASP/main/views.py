@@ -67,6 +67,20 @@ def registration(request):
         #image    =request.POST.get('image')
         Token.objects.filter(token=token).delete()
         return render(request,'main/login.html')
+    else :
+        dummy= Token.objects.filter(token=token)
+        userType = ""
+        for data in dummy:
+            userType = data.role;
+    
+        if(userType==1):
+            allLocations = Clinic.objects.all()
+            context ={
+                'allLocations' : allLocations,
+                'isCM' : True
+            }
+        return render(request,'main/registration.html',context)
+    return render(request,'main/registration.html')
             
 
 def loginSession(request):
