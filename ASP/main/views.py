@@ -14,8 +14,7 @@ from reportlab.lib.units import cm
 from reportlab.platypus import Image, SimpleDocTemplate, TableStyle, Paragraph
 from reportlab.platypus.tables import Table
 from io import BytesIO
-import datetime
-import csv
+import datetime, csv, os
 
 
 #global variable
@@ -446,15 +445,16 @@ def pdf_download(request):
         buffer = BytesIO()
         c = canvas.Canvas(buffer, pagesize=portrait(letter))
         c.setTitle("order"+str(order_id))
+
         # Borders
         c.line(60, 720, 550, 720)
         c.line(60, 720, 60, 50)
         c.line(60, 50, 550, 50)
         c.line(550, 720, 550, 50)
 
-        # Need to change path
-        #path = r'C:\Users\Kevin Hung\Documents\_Projects\Unchained\ASP\main\qm_logo.jpg'
-        #c.drawImage(path, 80, 610, width=120, height=100)
+        directory = os.path.dirname(__file__)
+        logo = os.path.join(directory, 'qm_logo.jpg')
+        c.drawImage(logo, 80, 610, width=120, height=100)
 
         c.line(60, 595, 550, 595)  # Horizontal line
         c.line(220, 595, 220, 720)  # Vertical line
@@ -529,7 +529,7 @@ def pdf_download(request):
 
     else:
         request.session['error'] = "Oh no!"
-        request.session['message'] = "Failed to view order"
+        request.session['message'] = "Failed to generate shipping label"
         return redirect('/main/wp_home')
 
 
