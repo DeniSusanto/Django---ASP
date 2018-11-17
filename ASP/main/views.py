@@ -10,7 +10,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, portrait
 from reportlab.platypus import Image
 from io import BytesIO
-from collections import OrderedDict
+import datetime
 import csv
 
 
@@ -387,8 +387,6 @@ def order_details(request):
             item_quantity = temp[0].getItemQuantity(item)
             item_details_list.append(ItemDetails(item, item_name, item_quantity))
 
-        item_details_list = list(OrderedDict.fromkeys(item_details_list))
-
         context = {
             'warehouse': warehouse,
             'order': order,
@@ -407,10 +405,12 @@ def order_details(request):
 def pdf_download(request):
     if request.method == 'POST':
         order_id = request.POST.get('id')
+        order_type = request.POST.get('type')
+        # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
         clinic = Clinic.objects.get(pk=clinic_manager.pk).name
-        items_list = ItemsInOrder.objects.filter(orderID=order_id)
+        items_list = ItemsInOrder.objects.filter(orderID=order_id).values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
             def __init__(self, item_id, name, quantity):
@@ -422,8 +422,9 @@ def pdf_download(request):
 
         for item in items_list:
             temp = Order.objects.filter(pk=order_id)
-            item_quantity = temp[0].getItemQuantity(item.itemID.get_id())
-            item_details_list.append(ItemDetails(item.itemID.get_id(), item.itemID.name, item_quantity))
+            item_name = ItemCatalogue.objects.get(pk=item).get_name()
+            item_quantity = temp[0].getItemQuantity(item)
+            item_details_list.append(ItemDetails(item, item_name, item_quantity))
 
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
@@ -431,14 +432,34 @@ def pdf_download(request):
         buffer = BytesIO()
         c = canvas.Canvas(buffer, pagesize=portrait(letter))
 
-        # Text begins here
+
+        # Borders
+        c.line(60, 720, 550, 720)
+        c.line(60, 720, 60, 100)
+        c.line(60, 100, 550, 100)
+        c.line(550, 720, 550, 100)
+
+        # Need to change path
+        path = r'C:\Users\Kevin Hung\Documents\_Projects\Unchained\ASP\main\qm_logo.jpg'
+        c.drawImage(path, 85, 580, width=140, height=120)
+
+        c.line(60, 560, 550, 560)
+        c.line(250, 560, 250, 720)
+        c.setFont('Helvetica', 12, leading=None)
+        print_time = str(datetime.date.today())
+        c.drawString(260, 700, "Ordered on: " + str(order.orderDateTime.date()))
+        c.drawString(260, 680, "Processed on: " + print_time)
+
         c.setFont('Helvetica', 30, leading=None)
         if order.priority == 1:
-            c.drawCentredString(310, 700, "ASP HIGH-PRIORITY PKG")
+            package_title = "ASP HIGH-PRIORITY PKG"
         elif order.priority == 2:
-            c.drawCentredString(310, 700, "ASP MEDIUM-PRIORITY PKG")
+            package_title = "ASP MEDIUM-PRIORITY PKG"
         else:
-            c.drawCentredString(310, 700, "ASP LOW-PRIORITY PKG")
+            package_title = "ASP LOW-PRIORITY PKG"
+
+        c.drawCentredString(310, 520, package_title)
+        c.line(60, 500, 550, 500)
 
         c.showPage()
         c.save()
