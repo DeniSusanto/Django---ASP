@@ -17,31 +17,16 @@ def boredaf(request):
     return redirect('http://www.staggeringbeauty.com/')
 #####DELETE THIS###
 
-def preRegistration(request):
-    token=request.GET.get('token')
-    counter = Token.objects.filter(token=token).count()
-    
-    if (request.method=='POST'):
-        userType =request.POST.get('userType')
-        url = "main/registration?token="+token+"&userType="+userType
-        return redirect(url)
-        
-    else:
-        if counter == 1:
-            return render(request,'main/preregistration.html')
-        else:
-            return redirect('http://www.staggeringbeauty.com/')
-
 def registration(request):
-    userType = int(request.GET.get('userType'))
     token=request.GET.get('token')
-    url = "main/registration?token="+token+"&userType="+str(userType)
     if(request.method=='POST'):
         
         dummy= Token.objects.filter(token=token)
         email = ""
+        userType = ""
         for data in dummy:
             email = data.email
+            userType = data.role;
         
         firstName=request.POST.get('firstName')
         lastName =request.POST.get('lastName')
@@ -82,16 +67,6 @@ def registration(request):
         #image    =request.POST.get('image')
         Token.objects.filter(token=token).delete()
         return render(request,'main/login.html')
-       
-    else :
-        if(userType==1):
-            allLocations = Clinic.objects.all()
-            context ={
-                'allLocations' : allLocations,
-                'isCM' : True
-            }
-            return render(request,'main/registration.html',context)
-        return render(request,'main/registration.html')
             
 
 def loginSession(request):
