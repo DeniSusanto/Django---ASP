@@ -7,8 +7,12 @@ from django.contrib import messages
 from .models import *
 from .helper import *
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, portrait
-from reportlab.platypus import Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import Image, SimpleDocTemplate, TableStyle, Paragraph
+from reportlab.platypus.tables import Table
 from io import BytesIO
 import datetime
 import csv
@@ -405,8 +409,6 @@ def order_details(request):
 def pdf_download(request):
     if request.method == 'POST':
         order_id = request.POST.get('id')
-        order_type = request.POST.get('type')
-        # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
         clinic = Clinic.objects.get(pk=clinic_manager.pk)
@@ -431,7 +433,6 @@ def pdf_download(request):
 
         buffer = BytesIO()
         c = canvas.Canvas(buffer, pagesize=portrait(letter))
-
 
         # Borders
         c.line(60, 720, 550, 720)
@@ -470,6 +471,42 @@ def pdf_download(request):
         c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
 
         c.line(60, 525, 550, 525)
+
+        styles = getSampleStyleSheet()
+        styles['Normal'].fontName = 'Times-Bold'
+        styles['Normal'].fontSize = 12
+        style = ParagraphStyle(
+            name='Body',
+            fontName='Times-Roman',
+            fontSize=12,
+        )
+
+        width, height = letter
+        data = [[Paragraph("ID", styles['Normal']),
+                 Paragraph("Name", styles['Normal']),
+                 Paragraph("Quantity", styles['Normal'])],
+                ]
+
+        for item in item_details_list:
+            item_data = [Paragraph(str(item.item_id), style), Paragraph(item.name, style), Paragraph(str(item.quantity), style)]
+            data.append(item_data)
+
+
+        table = Table(data, colWidths=[30, 350, 70])
+
+        table.setStyle(TableStyle(
+            [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+             # ('FONTSIZE', (0, 0), (-1, 0), 16),  # Table head
+             # ('FONTSIZE', (0, 1), (-1, -1), 14),  # Table contents
+             # ('FONT', (0, 0), (-1, 0), 'Times-Bold'),
+             # ('FONT', (0, 1), (-1, -1), 'Times-Roman'),
+             ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+             #('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
+
+        # table.wrapOn(c, width, height)
+        table.wrapOn(c, width, height)
+        table.drawOn(c, 80, 450)
 
         c.showPage()
         c.save()
