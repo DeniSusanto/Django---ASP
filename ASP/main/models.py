@@ -6,9 +6,6 @@ import base64
 import os
 from django.db.models import Q
 from math import sin, cos, atan2, sqrt, pi
-from itertools import permutations
-from sys import float_info
-
 # Create your models here.
             
 class Clinic(models.Model):
@@ -51,6 +48,9 @@ class ItemCatalogue(models.Model):
 
     def __str__(self):
         return str("ID: " + str(self.id) + " " + self.name)
+
+    def get_name(self):
+        return str(self.name)
 
 class UserRecord(models.Model):
     firstName=models.CharField(max_length=100)
@@ -159,6 +159,18 @@ class Order(models.Model):
             return "Medium"
         else:
             return "Low"
+
+    def str_status(self):
+        if self.status == 1:
+            return "Queued for Processing"
+        elif self.status == 2:
+            return "Processing by Warehouse"
+        elif self.status == 3:
+            return "Queued for Dispatch"
+        elif self.status == 4:
+            return "Dispatched"
+        else:
+            return "Delivered"
 
     def weightRound(self):
         return format(self.weight,'.2f') 

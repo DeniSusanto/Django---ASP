@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.urls import reverse
 
+admin.site.register(Clinic)
 admin.site.register(ClinicManager)
 admin.site.register(Dispatcher)
 admin.site.register(ItemsInCart)
@@ -15,8 +16,8 @@ admin.site.register(OrderRecord)
 # #temporarily ommited from admin panel
 admin.site.register(ItemCatalogue)
 # admin.site.register(ItemCategory)
-admin.site.register(Clinic)
-# admin.site.register(WarehousePersonnel)
+
+admin.site.register(WarehousePersonnel)
 # admin.site.register(HospitalAuthority)
 admin.site.register(Cart)
 
