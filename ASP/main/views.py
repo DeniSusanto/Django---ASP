@@ -75,6 +75,10 @@ def registration(request):
     
         if(userType==1):
             allLocations = Clinic.objects.all()
+            allExistingLocations = ClinicManager.objects.all()
+            for existingLocation in allExistingLocations:
+                allLocations=allLocations.exclude(id=existingLocation.locationID.id)
+            
             context ={
                 'allLocations' : allLocations,
                 'isCM' : True
