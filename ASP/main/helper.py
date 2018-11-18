@@ -141,16 +141,20 @@ def routePlanner(clinics):
 #         cmEmail=order.clinicID.email
         
 def userLogout(request):
+    request.session.flush()
+
     # keys=[]
     # for key, value in request.session.items():
     #     keys.append(key)
     # for key in keys:
     #     del request.session[key]
-    if 'id' in request.session:
-        del request.session['id']
-    if 'role' in request.session:
-        del request.session['role']
 
+
+    # if 'id' in request.session:
+    #     del request.session['id']
+    # if 'role' in request.session:
+    #     del request.session['role']
+    
 def redirectToHome(request):
     if 'role' in request.session:
         role=request.session['role']
