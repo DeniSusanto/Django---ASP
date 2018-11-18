@@ -146,8 +146,10 @@ def userLogout(request):
     #     keys.append(key)
     # for key in keys:
     #     del request.session[key]
-    del request.session['id']
-    del request.session['role']
+    if 'id' in request.session:
+        del request.session['id']
+    if 'role' in request.session:
+        del request.session['role']
 
 def redirectToHome(request):
     if 'role' in request.session:
