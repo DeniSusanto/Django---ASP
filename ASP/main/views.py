@@ -386,7 +386,6 @@ def order_details(request):
         # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
-        clinic = Clinic.objects.get(pk=clinic_manager.pk).name
         items_list = ItemsInOrder.objects.filter(orderID=order_id).values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
@@ -408,7 +407,6 @@ def order_details(request):
             'order': order,
             'type': order_type,
             'cm': clinic_manager,
-            'clinic': clinic,
             'item_details': item_details_list,
         }
         return render(request, 'main/order_details.html', context)
