@@ -170,8 +170,11 @@ def redirectToHome(request):
         return redirect('/main/login')
 
 def isUserPermitted(request, targetRole):
-    userRole=request.session['role']
-    if userRole != targetRole:
-        return False
+    if 'role' in request.session:
+        userRole=request.session['role']
+        if userRole != targetRole:
+            return False
+        else:
+            return True
     else:
-        return True
+        redirectToHome(request)

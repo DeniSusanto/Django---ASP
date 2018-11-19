@@ -146,7 +146,7 @@ def onlineOrder(request):
             category=int(request.session['category'])
             if not category == -1:
                 categoryObj=ItemCategory.objects.get(pk=category)
-                filteredItems=ItemCatalogue.objects.filter(category=categoryObj)
+                filteredItems=ItemCatalogue.objects.filter(category=categoryObj).order_by('-id')
                 context={
                 'title': "Home",
                 'filter':category,
@@ -173,7 +173,7 @@ def onlineOrder(request):
                 del request.session['category']
                 return redirect('cm_home')
         else:#if session has no filter request
-            allItems=ItemCatalogue.objects.all()
+            allItems=ItemCatalogue.objects.all().order_by('-id')
             ###Output all item name
             # name=""
             # for item in allItems:
@@ -225,10 +225,10 @@ def onlineOrder(request):
             itemObj=ItemCatalogue.objects.get(pk=item)
             cartObj=Cart.objects.get(clinicID=clinicMan)
 
-            if 'category' in request:
+            if 'category' in request:#maintain filter
                 category=request.session['category']
                 categoryObj=ItemCategory.objects.get(pk=category)
-                theItems=ItemCatalogue.objects.filter(category=categoryObj)
+                theItems=ItemCatalogue.objects.filter(category=categoryObj).order_by('-id')
                 fil=category #there exist filter
             else:
                 theItems=ItemCatalogue.objects.all()
