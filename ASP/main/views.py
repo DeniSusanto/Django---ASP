@@ -613,7 +613,7 @@ def dp_close_session(request):
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     #send email confirmation to clinic managers
-    sendDispatchedEmail(ordersToBeProcessed)
+    #sendDispatchedEmail(ordersToBeProcessed)
     #log orders, save it to OrderRecord
     for order in ordersToBeProcessed:
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
