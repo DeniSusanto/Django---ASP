@@ -792,16 +792,15 @@ def debug(request):
     # clinic= Clinic.objects.get(pk=1)
     # target=Clinic.objects.get(pk=2)
     # return HttpResponse(clinic.calc_dist(target))
-
-    del request.session['success']
-    return HttpResponse("ok")
-    #delete all sessions
-    keys=[]
-    for key, value in request.session.items():
-        keys.append(key)
-    for key in keys:
-        del request.session[key]
-    return redirect('/main/login')
+    # del request.session['success']
+    # return HttpResponse("ok")
+    # #delete all sessions
+    # keys=[]
+    # for key, value in request.session.items():
+    #     keys.append(key)
+    # for key in keys:
+    #     del request.session[key]
+    # return redirect('/main/login')
     #return HttpResponse(datetime.datetime.now())
-
+    return HttpResponse("nothing to see here")
     pass
