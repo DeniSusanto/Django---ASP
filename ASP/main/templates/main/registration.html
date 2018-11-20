@@ -33,13 +33,14 @@
                     <center><font color="red">Username already exists</font></center>
                 {%endif%}
                 <br>
-            <form class="form-inline" action="" method="post">{% csrf_token %}
+            <form class="form-inline" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
                 <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
                     <tr><td colspan='2'><center><h2>Sign Up</h2></center></td></tr>
                     <tr><td>First Name:</td><td><input type="text" name="firstName" value={{firstName}}></td></tr>
                     <tr><td>Last Name:</td><td><input type="text" name="lastName" value={{lastName}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="username" value={{username}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" value={{password}}></td></tr>
+                    <tr><td>Image:</td><td><input type="file" name="image"></td></tr>
                     {%if isCM%}
                     <tr>
                         <td>Clinic Location:</td>

@@ -3,7 +3,10 @@ from django.http import Http404, HttpResponse, HttpResponseForbidden, FileRespon
 from django.shortcuts import redirect
 from django.db.models import Q
 from django.db.models import Count
+from django.template import RequestContext
 from django.contrib import messages
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from .models import *
 from .helper import *
 from reportlab.pdfgen import canvas
@@ -35,18 +38,20 @@ def registration(request):
         userType = ""
         for data in dummy:
             email = data.email
-            userType = data.role;
+            userType = data.role
 
         firstName=request.POST.get('firstName')
         lastName =request.POST.get('lastName')
         username =request.POST.get('username')
         password =request.POST.get('password')
+        image    =request.FILES['image']
 
         context ={
                     'firstName' : firstName,
                     'lastName'  : lastName,
                     'username'  : username,
                     'password'  : password,
+                    'image'     : image,
                     'error'     : 1,
                 }
         if(userType==1):
@@ -56,24 +61,23 @@ def registration(request):
             location     = int(request.POST.get('location'))
             clinic = Clinic.objects.filter(id=location)
             for something in clinic:
-                ClinicManager(firstName=firstName,lastName=lastName,username=username,password=password,email=email,locationID=something).save()
+                ClinicManager(firstName=firstName,lastName=lastName,username=username,password=password,email=email,locationID=something,image=image).save()
         else:
             if(userType==2):
                 userCounter = WarehousePersonnel.objects.filter(username=username).count()
                 if (userCounter == 1):
                     return render(request,'main/registration.html',context)
-                WarehousePersonnel(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
+                WarehousePersonnel(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
             elif(userType==3):
                 userCounter = Dispatcher.objects.filter(username=username).count()
                 if (userCounter == 1):
                     return render(request,'main/registration.html',context)
-                Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
+                Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
             elif(userType==4):
                 userCounter = HospitalAuthority.objects.filter(username=username).count()
                 if (userCounter == 1):
                     return render(request,'main/registration.html',context)
-                HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email).save()
-        #image    =request.POST.get('image')
+                HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
         Token.objects.filter(token=token).delete()
         return render(request,'main/login.html')
     else :
@@ -92,7 +96,7 @@ def registration(request):
                 'allLocations' : allLocations,
                 'isCM' : True
             }
-        return render(request,'main/registration.html',context)
+            return render(request,'main/registration.html',context)
     return render(request,'main/registration.html')
             
 

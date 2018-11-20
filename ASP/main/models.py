@@ -137,7 +137,7 @@ class Token(models.Model):
         return ret_email'''
 
     def __str__(self):
-      return str(self.email)
+      return str(self.email + ": "+self.token)
 
 class Order(models.Model):
     clinicID=models.ForeignKey(ClinicManager, on_delete=models.CASCADE)
