@@ -22,7 +22,7 @@
                     <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
                         <input type="hidden" name="order" value={{ order.id }}>
                         <input type="hidden" name="type" value="dispatch">
-                        <input class="btn btn-success nav8_eclipse_btn n8_content_sub_title" type="submit" value="Confirm Completion">
+                        <input class="btn btn-success nav8_eclipse_btn n8_content_sub_title" type="submit" value="Confirm Completion" data-toggle="confirmation" data-title="Completed?">
                     </form>
                 {% endif %}
             </a>

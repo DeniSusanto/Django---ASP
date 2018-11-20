@@ -583,12 +583,17 @@ def dp_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
+    weight=0
+    for order in ordersToBeProcessed:
+        weight+=order.weight
+    weight=format(weight,'.2f')
     if not ordersToBeProcessed:
         remainingQueue=tupleOrder[1]
         request.session['error']="No orders to be dispatched"
         return redirect('/main/dp_dashboard')
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     context={
+                'weight':weight,
                 'nextOrders':ordersToBeProcessed,
                 'dispatcher':dispatcher,
             }
@@ -797,16 +802,15 @@ def debug(request):
     # clinic= Clinic.objects.get(pk=1)
     # target=Clinic.objects.get(pk=2)
     # return HttpResponse(clinic.calc_dist(target))
-
-    del request.session['success']
-    return HttpResponse("ok")
-    #delete all sessions
-    keys=[]
-    for key, value in request.session.items():
-        keys.append(key)
-    for key in keys:
-        del request.session[key]
-    return redirect('/main/login')
+    # del request.session['success']
+    # return HttpResponse("ok")
+    # #delete all sessions
+    # keys=[]
+    # for key, value in request.session.items():
+    #     keys.append(key)
+    # for key in keys:
+    #     del request.session[key]
+    # return redirect('/main/login')
     #return HttpResponse(datetime.datetime.now())
-
+    return HttpResponse("nothing to see here")
     pass
