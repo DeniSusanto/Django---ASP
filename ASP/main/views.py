@@ -573,12 +573,17 @@ def dp_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
+    weight=0
+    for order in ordersToBeProcessed:
+        weight+=order.weight
+    weight=format(weight,'.2f')
     if not ordersToBeProcessed:
         remainingQueue=tupleOrder[1]
         request.session['error']="No orders to be dispatched"
         return redirect('/main/dp_dashboard')
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     context={
+                'weight':weight,
                 'nextOrders':ordersToBeProcessed,
                 'dispatcher':dispatcher,
             }
