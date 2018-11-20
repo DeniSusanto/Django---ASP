@@ -84,7 +84,7 @@ def registration(request):
         dummy= Token.objects.filter(token=token)
         userType = ""
         for data in dummy:
-            userType = data.role;
+            userType = data.role
 
         if(userType==1):
             allLocations = Clinic.objects.all()
