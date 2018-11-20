@@ -10,12 +10,12 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, portrait
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from django.core.files import File
 from reportlab.lib.units import cm
 from reportlab.platypus import Image, SimpleDocTemplate, TableStyle, Paragraph
 from reportlab.platypus.tables import Table
 from io import BytesIO
-import datetime
-import csv
+import datetime, csv, os
 
 
 #global variable
@@ -454,9 +454,9 @@ def pdf_download(request):
         c.line(60, 50, 550, 50)
         c.line(550, 720, 550, 50)
 
-        # Need to change path
-        #path = r'C:\Users\Kevin Hung\Documents\_Projects\Unchained\ASP\main\qm_logo.jpg'
-        #c.drawImage(path, 80, 610, width=120, height=100)
+        directory = os.path.dirname(__file__)
+        logo = os.path.join(directory, 'media/qm_logo.jpg')
+        c.drawImage(logo, 80, 610, width=120, height=100)
 
         c.line(60, 595, 550, 595)  # Horizontal line
         c.line(220, 595, 220, 720)  # Vertical line
@@ -526,6 +526,16 @@ def pdf_download(request):
         pdf = buffer.getvalue()
         buffer.close()
         response.write(pdf)
+
+        f = open("shipping.pdf", "wb")
+        f.write(pdf)
+        f2 = open("shipping.pdf", "r")
+        django_file = File(f2)
+        order.file = django_file
+        order.save()
+        f.close()
+        f2.close()
+        os.remove("shipping.pdf")
 
         return response
 
