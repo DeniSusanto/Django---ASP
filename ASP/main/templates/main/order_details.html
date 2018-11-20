@@ -16,13 +16,13 @@
                     <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
                         <input type="hidden" name="order" value={{ order.id }}>
                         <input type="hidden" name="type" value="process">
-                        <input class="btn btn-outline-success btn-sm" type="submit" value="Begin Processing">
+                        <input class="btn btn-success nav8_eclipse_btn n8_content_sub_title" type="submit" value="Begin Processing">
                     </form>
                 {% else %}
                     <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
                         <input type="hidden" name="order" value={{ order.id }}>
                         <input type="hidden" name="type" value="dispatch">
-                        <input class="btn btn-outline-success btn-sm" type="submit" value="Confirm Completion">
+                        <input class="btn btn-success nav8_eclipse_btn n8_content_sub_title" type="submit" value="Confirm Completion">
                     </form>
                 {% endif %}
             </a>
@@ -55,13 +55,14 @@
                 {% endfor %}
             </table>
         </div>
-
+        {% if type != 'process' %}
         <div style="display: inline-block; float: right;margin-right:calc(0.5vw + 0.5vh);">
             <form class="form-inline" action="{% url "pdf_download" %}" method="post">{% csrf_token %}
                         <input type="hidden" name="id" value={{ order.id }}>
-                        <input class="btn btn-outline-success btn-sm" type="submit" value="Download Shipping Label">
+                        <input class="btn btn-secondary nav8_eclipse_btn n8_content_sub_title" type="submit" value="Download Shipping Label">
                     </form>
         </div>
+        {% endif %}
     </div>
 
 

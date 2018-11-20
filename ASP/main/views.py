@@ -231,7 +231,7 @@ def onlineOrder(request):
                 theItems=ItemCatalogue.objects.filter(category=categoryObj).order_by('-id')
                 fil=category #there exist filter
             else:
-                theItems=ItemCatalogue.objects.all()
+                theItems=ItemCatalogue.objects.all().order_by('-id')
                 fil=-1
 
             if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):
@@ -370,19 +370,23 @@ def wp_home(request):
         if order_type == "process":
             order.status = statusToInt("Processing by Warehouse")
             order.save()
+            response=redirect('/main/order_details')
+            additionString='?id='+str(order_id)+'&type=dispatch'
+            response['Location'] += additionString
+            return response
+
         elif order_type == "dispatch":
             order.status = statusToInt("Queued for Dispatch")
             order.save()
-
-        request.session['success'] = "Order has been updated!"
-        return redirect('/main/wp_home')
+            request.session['success'] = "Order has been updated!"
+            return redirect('/main/wp_home')
 
 
 def order_details(request):
-    if request.method == 'POST':
+    if request.method == 'GET':
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
-        order_id = request.POST.get('id')
-        order_type = request.POST.get('type')
+        order_id = request.GET.get('id')
+        order_type = request.GET.get('type')
         # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
