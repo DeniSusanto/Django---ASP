@@ -74,11 +74,11 @@ def registration(request):
                 if (userCounter == 1):
                     return render(request,'main/registration.html',context)
                 Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
-            elif(userType==4):
-                userCounter = HospitalAuthority.objects.filter(username=username).count()
-                if (userCounter == 1):
-                    return render(request,'main/registration.html',context)
-                HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
+            # elif(userType==4):
+            #     userCounter = HospitalAuthority.objects.filter(username=username).count()
+            #     if (userCounter == 1):
+            #         return render(request,'main/registration.html',context)
+            #     HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
         Token.objects.filter(token=token).delete()
         return render(request,'main/login.html')
     else :
@@ -130,11 +130,11 @@ def loginSession(request):
                 request.session['role']="dp"
                 Dispatcher.objects.get(pk=request.session['id'])
                 return redirect('/main/dp_dashboard')
-            elif ha.count() > 0:
-                request.session['id']=ha[0].id
-                request.session['role']="ha"
-                HospitalAuthority.objects.get(pk=request.session['id'])
-                return redirect()
+            # elif ha.count() > 0:
+            #     request.session['id']=ha[0].id
+            #     request.session['role']="ha"
+            #     HospitalAuthority.objects.get(pk=request.session['id'])
+            #     return redirect()
             else: #data doesnt match any user records
                 messages.error(request,'The Username or Password Entered is Incorrect. Please Try Again.')
                 return redirect('/main/login')
@@ -430,7 +430,7 @@ def pdf_download(request):
         order_id = request.POST.get('id')
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
-        clinic = Clinic.objects.get(pk=clinic_manager.pk)
+        clinic = clinic_manager.locationID
         items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
@@ -461,7 +461,7 @@ def pdf_download(request):
 
         directory = os.path.dirname(__file__)
         logo = os.path.join(directory, 'media/qm_logo.jpg')
-        c.drawImage(logo, 80, 610, width=120, height=100)
+      # c.drawImage(logo, 80, 610, width=120, height=100)
 
         c.line(60, 595, 550, 595)  # Horizontal line
         c.line(220, 595, 220, 720)  # Vertical line
