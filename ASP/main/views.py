@@ -394,7 +394,7 @@ def order_details(request):
         # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
-        items_list = ItemsInOrder.objects.filter(orderID=order_id).values_list('itemID', flat=True).distinct()
+        items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
             def __init__(self, item_id, name, quantity):
@@ -430,7 +430,7 @@ def pdf_download(request):
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
         clinic = Clinic.objects.get(pk=clinic_manager.pk)
-        items_list = ItemsInOrder.objects.filter(orderID=order_id).values_list('itemID', flat=True).distinct()
+        items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
             def __init__(self, item_id, name, quantity):
@@ -447,7 +447,7 @@ def pdf_download(request):
             item_details_list.append(ItemDetails(item, item_name, item_quantity))
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'inline; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
+        response['Content-Disposition'] = 'attachment; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
 
         buffer = BytesIO()
         c = canvas.Canvas(buffer, pagesize=portrait(letter))
