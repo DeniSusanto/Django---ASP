@@ -724,6 +724,25 @@ def confirmReceived(request):
 
     return redirect('/main/myorders')
 
+def orderRecords(request):
+    allOrder=Order.objects.filter(status=5).order_by('orderDateTime')
+    finishedOrders=[]
+    for order in allOrder:
+        itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
+        itemsTup=[]
+        for itemid in itemsObj:
+            item=ItemCatalogue.objects.get(pk=itemid['itemID'])
+            itemQuantity=order.getItemQuantity(item)
+            tup=(item.name, itemQuantity)
+            itemsTup.append(tup)
+        recordObj=OrderRecord.objects.get(orderID=order)
+        orderTup=(order.id, intToPriority(order.priority), itemsTup, format(order.weight,'.2f'), order.orderDateTime, recordObj.deliveredDateTime, order.clinicID.fullName(), order.clinicID.locationID.name)
+        finishedOrders.append(orderTup)
+    context={
+        'orderHistory':finishedOrders,
+        }
+    return render(request, 'main/orderRecords.html', context)
+
 def debug(request):
     # # #adding item to cart
     # # clinicMan=ClinicManager.objects.get(pk=2) 
