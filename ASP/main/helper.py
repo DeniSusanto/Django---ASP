@@ -110,7 +110,7 @@ def dp_nextOrders(allOrders):
 
 # return a list of string where each element represent a string of the leg information
 def routePlanner(clinics):
-    queen_mary = Clinic(name="Queen Mary Hospital", lat=22.269660, longitude=114.131303, alt=163)
+    queen_mary = Clinic(name="Queen Mary Hospital", lat=22.270257, longitude=114.131376, alt=161)
 
     all_routes = list(permutations(clinics))
     best_route = ()
