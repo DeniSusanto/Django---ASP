@@ -59,9 +59,10 @@ def registration(request):
             if (userCounter == 1):
                 return render(request,url,context)
             location     = int(request.POST.get('location'))
-            clinic = Clinic.objects.filter(id=location)
-            for something in clinic:
-                ClinicManager(firstName=firstName,lastName=lastName,username=username,password=password,email=email,locationID=something,image=image).save()
+            clinic = Clinic.objects.get(id=location)
+            cm=ClinicManager(firstName=firstName,lastName=lastName,username=username,password=password,email=email,locationID=clinic,image=image)
+            cm.save()
+            Cart(clinicID=cm).save()
         else:
             if(userType==2):
                 userCounter = WarehousePersonnel.objects.filter(username=username).count()
