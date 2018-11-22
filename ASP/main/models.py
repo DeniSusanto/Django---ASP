@@ -7,7 +7,6 @@ import os
 from django.db.models import Q
 from math import sin, cos, atan2, sqrt, pi
 # Create your models here.
-            
 class Clinic(models.Model):
     name=models.CharField(max_length=300, unique=True)
     lat=models.FloatField()
@@ -31,7 +30,11 @@ class Clinic(models.Model):
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
         distance = 6371 * c
         return distance
-   
+
+class InterDistance(models.Model):
+    clinic1=models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='clinic1')
+    clinic2=models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='clinic2')
+    distance=models.FloatField()
 
 class ItemCategory(models.Model):
     name=models.CharField(max_length=100)
