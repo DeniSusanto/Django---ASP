@@ -17,24 +17,19 @@ class Clinic(models.Model):
         return str(self.name)
     
     def calc_dist(self, target):
-        lat1=self.lat
-        long1=self.longitude
-
-        lat2=target.lat
-        long2=target.longitude
-        
-        rad = pi / 180.0
-        d_long = (long2 - long1) * rad
-        d_lat = (lat2 - lat1) * rad
-        a = pow(sin(d_lat / 2.0), 2) + cos(lat1 * rad) * cos(lat2 * rad) * pow(sin(d_long / 2.0), 2)
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        distance = 6371 * c
-        return distance
+        if InterDistance.objects.filter(Q(clinic1=self) & Q(clinic2=target)).count() > 0:
+            obj=InterDistance.objects.get(clinic1=self , clinic2=target)
+            return obj.distance
+        else:
+            obj=InterDistance.objects.get(clinic1=target , clinic2=self)
+            return obj.distance
 
 class InterDistance(models.Model):
     clinic1=models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='clinic1')
     clinic2=models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='clinic2')
     distance=models.FloatField()
+    def __str__(self):
+        return self.clinic1.name + " - " + self.clinic2.name + ": " + str(self.distance) + " km"
 
 class ItemCategory(models.Model):
     name=models.CharField(max_length=100)
@@ -112,7 +107,7 @@ class Cart(models.Model):
         itemList=ItemsInCart.objects.filter(cartID=self)
         num=0
         for item in itemList:
-            num+=item.quantiy
+            num+=item.quantity
         
         return num
 
@@ -184,12 +179,13 @@ class Order(models.Model):
         return format(self.weight,'.2f') 
     
     def getItemQuantity(self, itemID):
-        if ItemsInOrder.objects.filter(Q(itemID=itemID) & Q(orderID=self.id)).count()>0:
-            return ItemsInOrder.objects.filter(Q(itemID=itemID) & Q(orderID=self.id)).count()
+        if ItemsInOrder.objects.filter(Q(itemID=itemID) & Q(orderID=self.id)).count()==1:
+            return ItemsInOrder.objects.get(itemID=itemID, orderID=self.id).quantity
 
 class ItemsInOrder(models.Model):
     orderID=models.ForeignKey(Order, on_delete=models.CASCADE)
     itemID=models.ForeignKey(ItemCatalogue, on_delete=models.CASCADE)
+    quantity=models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return str(self.orderID.clinicID.firstName + " " + self.orderID.clinicID.lastName + "'s order: " + self.itemID.name)

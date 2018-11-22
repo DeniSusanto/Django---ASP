@@ -86,7 +86,7 @@ def cartToOrder(cart, priority):
     orderEnt.save()
 
     for item in itemsInCart:
-        itemOrdersEnt = ItemsInOrder(orderID=orderEnt, itemID=item.itemID)
+        itemOrdersEnt = ItemsInOrder(orderID=orderEnt, itemID=item.itemID, quantity=item.quantity)
         itemOrdersEnt.save()
 
     cart.emptyCart()
@@ -110,7 +110,7 @@ def dp_nextOrders(allOrders):
 
 # return a list of string where each element represent a string of the leg information
 def routePlanner(clinics):
-    queen_mary = Clinic(name="Queen Mary Hospital", lat=22.270257, longitude=114.131376, alt=161)
+    queen_mary = Clinic.objects.get(name="Queen Mary Hospital Drone Port")
 
     all_routes = list(permutations(clinics))
     best_route = ()

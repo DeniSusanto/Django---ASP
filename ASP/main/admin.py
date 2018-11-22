@@ -12,6 +12,7 @@ admin.site.register(ItemsInCart)
 admin.site.register(ItemsInOrder)
 admin.site.register(Order)
 admin.site.register(OrderRecord)
+admin.site.register(InterDistance)
 
 # #temporarily ommited from admin panel
 admin.site.register(ItemCatalogue)
