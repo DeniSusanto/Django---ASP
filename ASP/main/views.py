@@ -397,6 +397,8 @@ def wp_home(request):
 
 
 def order_details(request):
+    if not isUserPermitted(request, 'cm'):
+        return redirectToHome(request)
     if request.method == 'GET':
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
         order_id = request.GET.get('id')
@@ -435,6 +437,8 @@ def order_details(request):
 
 
 def pdf_download(request):
+    if not isUserPermitted(request, 'wp'):
+        return redirectToHome(request)
     if request.method == 'POST':
         order_id = request.POST.get('id')
         order = Order.objects.get(pk=order_id)

@@ -163,7 +163,7 @@ def redirectToHome(request):
         elif role=='dp':
             return redirect('/main/dp_dashboard')
         elif role=='wp':
-            pass
+            return redirect('/main/wp_home')
         elif role=='ha':
             pass
     else:
@@ -173,6 +173,7 @@ def isUserPermitted(request, targetRole):
     if 'role' in request.session:
         userRole=request.session['role']
         if userRole != targetRole:
+            request.session['error']="You don't have persmission to access the page!"
             return False
         else:
             return True
