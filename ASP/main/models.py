@@ -104,7 +104,7 @@ class Cart(models.Model):
         itemList=ItemsInCart.objects.filter(cartID=self)
         weight=float(0)
         for item in itemList:
-            weight=weight+item.itemID.weight
+            weight=weight+(item.itemID.weight * item.quantity)
         
         return weight
     
@@ -112,7 +112,7 @@ class Cart(models.Model):
         itemList=ItemsInCart.objects.filter(cartID=self)
         num=0
         for item in itemList:
-            num+=1
+            num+=item.quantiy
         
         return num
 
@@ -124,9 +124,14 @@ class Cart(models.Model):
 class ItemsInCart(models.Model):
     cartID=models.ForeignKey(Cart, on_delete=models.CASCADE)
     itemID=models.ForeignKey(ItemCatalogue, on_delete=models.CASCADE)
-
+    quantity=models.IntegerField(null=True, blank=True)
     def __str__(self):
         return str(self.cartID.clinicID.firstName + " " + self.cartID.clinicID.lastName + "'s cart: " + self.itemID.name)
+    
+    def itemWeight(self):
+        itemObj=ItemCatalogue.objects.get(pk=self.itemID)
+        weight=itemObj.weight * self.quantity
+        return weight
 
 class Token(models.Model):
     def id_generator():

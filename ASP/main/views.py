@@ -239,7 +239,7 @@ def onlineOrder(request):
                 theItems=ItemCatalogue.objects.all().order_by('-id')
                 fil=-1
 
-            if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):
+            if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):#max order limit reached
                 context={
                 'title': "Home",
                 'filter': fil,
@@ -250,10 +250,15 @@ def onlineOrder(request):
                 }
                 return render(request, 'main/cm_home.html', context)
            
-
-            for i in range(quantity):
-                itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
-                itemInCart.save()
+            #add items to cart
+            #if similar item exist in card
+            if ItemsInCart.objects.filter(Q(itemID=itemObj) & Q(cartID=cartObj)).count()>0:
+                obj=ItemsInCart.objects.get(Q(itemID=itemObj) & Q(cartID=cartObj))
+                obj.quantity=obj.quantity+quantity
+                obj.save()
+            else:
+                obj=ItemsInCart(cartID=cartObj, itemID=itemObj, quantity=quantity)
+                obj.save()
 
             context={
                 'title': "Home",
@@ -274,12 +279,11 @@ def cm_cart(request):
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
         cartObj=Cart.objects.get(clinicID=clinicMan)
         cartWeight=format(cartObj.getWeight(),'.2f') 
-        itemsCount=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').annotate(total=Count('cartID')).order_by('itemID')
-        #itemsCartList=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').distinct().order_by('itemID')
+        cartItems=ItemsInCart.objects.filter(cartID=cartObj)
         itemsInCart=[]
-        for item in itemsCount:
-            itemName=(ItemCatalogue.objects.get(pk=item['itemID'])).name
-            tup=(item['itemID'],itemName, item['total'])
+        for item in cartItems:
+            itemName=item.itemID.name
+            tup=(item.itemID.id,itemName, item.quantity, format(item.itemID.weight,'.2f'))
             itemsInCart.append(tup)
         
         # itemPkList=[]
@@ -307,9 +311,14 @@ def cm_cart(request):
         itemObj=ItemCatalogue.objects.get(pk=item)
         quantity=int(request.POST.get('quantity'))
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+        cartObj=Cart.objects.get(clinicID=clinicMan)
 
-        itemInCart=ItemsInCart.objects.filter(Q(cartID__clinicID=clinicMan) & Q(itemID=itemObj))[:quantity]
-        ItemsInCart.objects.filter(pk__in=itemInCart).delete()
+        itemInCart=ItemsInCart.objects.get(cartID=cartObj, itemID=itemObj)
+        if (itemInCart.quantity - quantity) == 0:
+            itemInCart.delete()
+        else:
+            itemInCart.quantity=itemInCart.quantity - quantity
+            itemInCart.save()
 
         # for i in range(int(quantity)):
         #     itemInCart[i].delete()
