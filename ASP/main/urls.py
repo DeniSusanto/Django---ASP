@@ -15,7 +15,8 @@ urlpatterns = [
     url(r'registration$',views.registration),
     url(r'^login$', views.loginSession, name='loginSession'),
     url(r'^logout$', views.logout, name='logout'),
-     url(r'^order_record$', views.orderRecords, name='order_record'),
+    url(r'^order_record$', views.orderRecords, name='order_record'),
+    url(r'^change_password$', views.change_password, name='change_password'),
 
     #CM
     url(r'^cm_home$', views.onlineOrder, name='cm_home'),
