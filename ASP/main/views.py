@@ -1,24 +1,12 @@
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, HttpResponseForbidden, FileResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.db.models import Q
 from django.db.models import Count
-from django.template import RequestContext
 from django.contrib import messages
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from .models import *
 from .helper import *
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, portrait
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from django.core.files import File
-from reportlab.lib.units import cm
-from reportlab.platypus import Image, SimpleDocTemplate, TableStyle, Paragraph
-from reportlab.platypus.tables import Table
-from io import BytesIO
-import datetime, csv, os
+import csv
 
 
 #global variable
@@ -29,121 +17,80 @@ def boredaf(request):
     return redirect('http://www.staggeringbeauty.com/')
 #####DELETE THIS###
 
-def registration(request):
-    token=request.GET.get('token')
-    if(request.method=='POST'):
-        
-        dummy= Token.objects.filter(token=token)
-        email = ""
-        userType = ""
-        for data in dummy:
-            email = data.email
-            userType = data.role
-
-        firstName=request.POST.get('firstName')
-        lastName =request.POST.get('lastName')
-        username =request.POST.get('username')
-        password =request.POST.get('password')
-        image    =request.FILES['image']
-
-        context ={
-                    'firstName' : firstName,
-                    'lastName'  : lastName,
-                    'username'  : username,
-                    'password'  : password,
-                    'image'     : image,
-                    'error'     : 1,
-                }
-        if(userType==1):
-            userCounter = ClinicManager.objects.filter(username=username).count()
-            if (userCounter == 1):
-                return render(request,url,context)
-            location     = int(request.POST.get('location'))
-            clinic = Clinic.objects.get(id=location)
-            cm=ClinicManager(firstName=firstName,lastName=lastName,username=username,password=password,email=email,locationID=clinic,image=image)
-            cm.save()
-            Cart(clinicID=cm).save()
+def forget_password(request):
+    if(request.method=='GET'): #return just the homepage
+        #what if i cant open it without being redirected from another page??
+        return render(request, 'main/forget_password.html')    
+    else:   
+        #get username 
+        new_pw=request.POST.get('new_password')
+        new_pw2=request.POST.get('new_password2')
+        if(new_pw==new_pw2):
+            cm=ClinicManager.objects.filter(username=uname)
+            wp=WarehousePersonnel.objects.filter(username=uname)
+            dis=Dispatcher.objects.filter(username=uname)
+            ha=HospitalAuthority.objects.filter(username=uname)
+            if cm.count() > 0:
+                to_update = ClinicManager.objects.filter(username=uname).update(password=new_pw)
+            elif wp.count() > 0:
+                to_update = WarehousePersonnel.objects.filter(username=uname).update(password=new_pw) 
+            elif dis.count() > 0:
+                to_update = Dispatcher.objects.filter(username=uname).update(password=new_pw)
+            elif ha.count() > 0:
+                to_update = HospitalAuthority.objects.filter(username=uname).update(password=new_pw)
+            return redirect('/main/login')    
         else:
-            if(userType==2):
-                userCounter = WarehousePersonnel.objects.filter(username=username).count()
-                if (userCounter == 1):
-                    return render(request,'main/registration.html',context)
-                WarehousePersonnel(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
-            elif(userType==3):
-                userCounter = Dispatcher.objects.filter(username=username).count()
-                if (userCounter == 1):
-                    return render(request,'main/registration.html',context)
-                Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
-            # elif(userType==4):
-            #     userCounter = HospitalAuthority.objects.filter(username=username).count()
-            #     if (userCounter == 1):
-            #         return render(request,'main/registration.html',context)
-            #     HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
-        Token.objects.filter(token=token).delete()
-        return render(request,'main/login.html')
-    else :
-        dummy= Token.objects.filter(token=token)
-        userType = ""
-        for data in dummy:
-            userType = data.role
+            messages.error(request,'Passwords do not match. Please re-enter the fields.')
+            return redirect('/main/forget_password')    
 
-        if(userType==1):
-            allLocations = Clinic.objects.all()
-            allExistingLocations = ClinicManager.objects.all()
-            for existingLocation in allExistingLocations:
-                allLocations=allLocations.exclude(id=existingLocation.locationID.id)
-
-            context ={
-                'allLocations' : allLocations,
-                'isCM' : True
-            }
-            return render(request,'main/registration.html',context)
-    return render(request,'main/registration.html')
-            
+def verify_email(request):
+    if(request.method=='GET'): #return just the homepage
+        return render(request, 'main/verify_email.html')    
+    else: 
+        email=request.POST.get('email')
+        cm=ClinicManager.objects.filter(email=email)
+        wp=WarehousePersonnel.objects.filter(email=email)
+        dis=Dispatcher.objects.filter(email=email)
+        ha=HospitalAuthority.objects.filter(email=email)
+        if (cm.count() > 0) | (wp.count() > 0) | (dis.count() > 0) | (ha.count() > 0):
+            context['email'] = email
+            return render(request, 'forget_password.html', context)
+        else:    
+            messages.error(request,'The email you entered does not exist.')
+            return redirect('/main/verify_email')    
 
 def loginSession(request):
-    if 'id' in request.session and 'role' in request.session:
-        role=request.session['role']
-        return redirectToHome(request)
-    else:
-        if(request.method=='GET'): #return just the homepage
-            return render(request, 'main/login.html')
-        else: #process the login
-            uname=request.POST.get('username')
-            pw=request.POST.get('password')
-            cm=ClinicManager.objects.filter(Q(username=uname) & Q(password=pw))
-            wp=WarehousePersonnel.objects.filter(Q(username=uname) & Q(password=pw))
-            dis=Dispatcher.objects.filter(Q(username=uname) & Q(password=pw))
-            ha=HospitalAuthority.objects.filter(Q(username=uname) & Q(password=pw))
-            if cm.count() > 0:
-                request.session['id']=cm[0].id
-                request.session['role']="cm"
-                ClinicManager.objects.get(pk=request.session['id'])
-                return redirect('/main/cm_home')
-            elif wp.count() > 0:
-                request.session['id']=wp[0].id
-                request.session['role']="wp"
-                WarehousePersonnel.objects.get(pk=request.session['id'])
-                return redirect('/main/wp_home')
-            elif dis.count() > 0:
-                request.session['id']=dis[0].id
-                request.session['role']="dp"
-                Dispatcher.objects.get(pk=request.session['id'])
-                return redirect('/main/dp_dashboard')
-            # elif ha.count() > 0:
-            #     request.session['id']=ha[0].id
-            #     request.session['role']="ha"
-            #     HospitalAuthority.objects.get(pk=request.session['id'])
-            #     return redirect()
-            else: #data doesnt match any user records
-                messages.error(request,'The Username or Password Entered is Incorrect. Please Try Again.')
-                return redirect('/main/login')
+    if(request.method=='GET'): #return just the homepage
+        return render(request, 'main/login.html')    
+    else: #process the login
+        uname=request.POST.get('username')
+        pw=request.POST.get('password')
+        cm=ClinicManager.objects.filter(Q(username=uname) & Q(password=pw))
+        wp=WarehousePersonnel.objects.filter(Q(username=uname) & Q(password=pw))
+        dis=Dispatcher.objects.filter(Q(username=uname) & Q(password=pw))
+        ha=HospitalAuthority.objects.filter(Q(username=uname) & Q(password=pw))
+        if cm.count() > 0:
+            request.session['id']=cm[0].id
+            ClinicManager.objects.get(pk=request.session['id'])
+            return redirect('/main/cm_home')
+        elif wp.count() > 0:
+            request.session['id']=wp[0].id
+            WarehousePersonnel.objects.get(pk=request.session['id'])
+            return redirect()    
+        elif dis.count() > 0:
+            request.session['id']=dis[0].id
+            Dispatcher.objects.get(pk=request.session['id'])
+            return redirect('/main/dp_dashboard')    
+        elif ha.count() > 0:
+            request.session['id']=ha[0].id
+            HospitalAuthority.objects.get(pk=request.session['id'])
+            return redirect()
+        else: #data doesnt match any user records
+            messages.error(request,'The Username or Password Entered is Incorrect. Please Try Again.')
+            return redirect('/main/login')
 
 
 def onlineOrder(request):
-    if not isUserPermitted(request,'cm'):
-        return redirectToHome(request)
-
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
     allCategories=ItemCategory.objects.all()
     if(request.method=='GET'):#if session has filter request
@@ -151,7 +98,7 @@ def onlineOrder(request):
             category=int(request.session['category'])
             if not category == -1:
                 categoryObj=ItemCategory.objects.get(pk=category)
-                filteredItems=ItemCatalogue.objects.filter(category=categoryObj).order_by('-id')
+                filteredItems=ItemCatalogue.objects.filter(category=categoryObj)
                 context={
                 'title': "Home",
                 'filter':category,
@@ -178,7 +125,7 @@ def onlineOrder(request):
                 del request.session['category']
                 return redirect('cm_home')
         else:#if session has no filter request
-            allItems=ItemCatalogue.objects.all().order_by('-id')
+            allItems=ItemCatalogue.objects.all()
             ###Output all item name
             # name=""
             # for item in allItems:
@@ -230,16 +177,16 @@ def onlineOrder(request):
             itemObj=ItemCatalogue.objects.get(pk=item)
             cartObj=Cart.objects.get(clinicID=clinicMan)
 
-            if 'category' in request:#maintain filter
+            if 'category' in request:
                 category=request.session['category']
                 categoryObj=ItemCategory.objects.get(pk=category)
-                theItems=ItemCatalogue.objects.filter(category=categoryObj).order_by('-id')
+                theItems=ItemCatalogue.objects.filter(category=categoryObj)
                 fil=category #there exist filter
             else:
-                theItems=ItemCatalogue.objects.all().order_by('-id')
+                theItems=ItemCatalogue.objects.all()
                 fil=-1
 
-            if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):#max order limit reached
+            if(itemObj.weight*quantity+cartObj.getWeight() > maxOrderWeight):
                 context={
                 'title': "Home",
                 'filter': fil,
@@ -250,15 +197,10 @@ def onlineOrder(request):
                 }
                 return render(request, 'main/cm_home.html', context)
            
-            #add items to cart
-            #if similar item exist in card
-            if ItemsInCart.objects.filter(Q(itemID=itemObj) & Q(cartID=cartObj)).count()>0:
-                obj=ItemsInCart.objects.get(Q(itemID=itemObj) & Q(cartID=cartObj))
-                obj.quantity=obj.quantity+quantity
-                obj.save()
-            else:
-                obj=ItemsInCart(cartID=cartObj, itemID=itemObj, quantity=quantity)
-                obj.save()
+
+            for i in range(quantity):
+                itemInCart=ItemsInCart(cartID=cartObj, itemID=itemObj)
+                itemInCart.save()
 
             context={
                 'title': "Home",
@@ -272,18 +214,16 @@ def onlineOrder(request):
             
 
 def cm_cart(request):
-    if not isUserPermitted(request,'cm'):
-        return redirectToHome(request)
-
     if request.method=='GET':
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
         cartObj=Cart.objects.get(clinicID=clinicMan)
         cartWeight=format(cartObj.getWeight(),'.2f') 
-        cartItems=ItemsInCart.objects.filter(cartID=cartObj)
+        itemsCount=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').annotate(total=Count('cartID')).order_by('itemID')
+        #itemsCartList=ItemsInCart.objects.filter(cartID=cartObj).values('itemID').distinct().order_by('itemID')
         itemsInCart=[]
-        for item in cartItems:
-            itemName=item.itemID.name
-            tup=(item.itemID.id,itemName, item.quantity, format(item.itemID.weight,'.2f'))
+        for item in itemsCount:
+            itemName=ItemCatalogue.objects.get(pk=item['itemID'])
+            tup=(item['itemID'],itemName, item['total'])
             itemsInCart.append(tup)
         
         # itemPkList=[]
@@ -311,14 +251,9 @@ def cm_cart(request):
         itemObj=ItemCatalogue.objects.get(pk=item)
         quantity=int(request.POST.get('quantity'))
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
-        cartObj=Cart.objects.get(clinicID=clinicMan)
 
-        itemInCart=ItemsInCart.objects.get(cartID=cartObj, itemID=itemObj)
-        if (itemInCart.quantity - quantity) == 0:
-            itemInCart.delete()
-        else:
-            itemInCart.quantity=itemInCart.quantity - quantity
-            itemInCart.save()
+        itemInCart=ItemsInCart.objects.filter(Q(cartID__clinicID=clinicMan) & Q(itemID=itemObj))[:quantity]
+        ItemsInCart.objects.filter(pk__in=itemInCart).delete()
 
         # for i in range(int(quantity)):
         #     itemInCart[i].delete()
@@ -328,9 +263,6 @@ def cm_cart(request):
 
 
 def submitorder(request):
-    if not isUserPermitted(request,'cm'):
-        return redirectToHome(request)
-
     clinicMan=ClinicManager.objects.get(pk=request.session['id'])
     allCategories=ItemCategory.objects.all()
     cartObj=Cart.objects.get(clinicID=clinicMan)
@@ -339,289 +271,58 @@ def submitorder(request):
     if succeed:#if suceed to migrate cart to order
         
         request.session['success']="Order has been submitted!"
-        return redirect('/main/myorders')
+        return redirect('/main/cm_home')
     else:
        
         request.session['error']="Oh no!"
         request.session['message']="Failed to submit order"
         return redirect('/main/cm_home')
 
-
-def wp_home(request):
-    if not isUserPermitted(request, 'wp'):
-        return redirectToHome(request)
-
-    warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
-    if request.method == 'GET':
-        processing_queue = Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
-        packing_queue = Order.objects.filter(status=statusToInt("Processing by Warehouse")).order_by('priority', 'orderDateTime')
-        context = {
-            'processing_queue': processing_queue,
-            'warehouse': warehouse,
-            'packing_queue': packing_queue,
-        }
-
-        if 'success' in request.session:
-            success = request.session['success']
-            del request.session['success']
-            context['success'] = success
-        if 'error' in request.session:
-            error = request.session['error']
-            del request.session['error']
-            context['error'] = error
-        if 'message' in request.session:
-            message = request.session['message']
-            del request.session['message']
-            context['message'] = message
-
-        return render(request, 'main/wp_home.html', context)
-
-    elif request.method == 'POST':
-        order_id = request.POST.get('order')
-        order_type = request.POST.get('type')
-        order = Order.objects.get(pk=order_id)
-
-        if order_type == "process":
-            order.status = statusToInt("Processing by Warehouse")
-            order.save()
-            response=redirect('/main/order_details')
-            additionString='?id='+str(order_id)+'&type=dispatch'
-            response['Location'] += additionString
-            return response
-
-        elif order_type == "dispatch":
-            order.status = statusToInt("Queued for Dispatch")
-            order.save()
-            request.session['success'] = "Order has been updated!"
-            return redirect('/main/wp_home')
-
-
-def order_details(request):
-    if not isUserPermitted(request, 'cm'):
-        return redirectToHome(request)
-    if request.method == 'GET':
-        warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
-        order_id = request.GET.get('id')
-        order_type = request.GET.get('type')
-        # order_id = int(order_id[:-1])
-        order = Order.objects.get(pk=order_id)
-        clinic_manager = Order.objects.get(pk=order_id).clinicID
-        items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
-
-        class ItemDetails:
-            def __init__(self, item_id, name, quantity):
-                self.item_id = item_id
-                self.name = name
-                self.quantity = quantity
-
-        item_details_list = []
-
-        for item in items_list:
-            temp = Order.objects.filter(pk=order_id)
-            item_name = ItemCatalogue.objects.get(pk=item).get_name()
-            item_quantity = temp[0].getItemQuantity(item)
-            item_details_list.append(ItemDetails(item, item_name, item_quantity))
-
-        context = {
-            'warehouse': warehouse,
-            'order': order,
-            'type': order_type,
-            'cm': clinic_manager,
-            'item_details': item_details_list,
-        }
-        return render(request, 'main/order_details.html', context)
-    else:
-        request.session['error'] = "Oh no!"
-        request.session['message'] = "Failed to view order"
-        return redirect('/main/wp_home')
-
-
-def pdf_download(request):
-    if not isUserPermitted(request, 'wp'):
-        return redirectToHome(request)
-    if request.method == 'POST':
-        order_id = request.POST.get('id')
-        order = Order.objects.get(pk=order_id)
-        clinic_manager = Order.objects.get(pk=order_id).clinicID
-        clinic = clinic_manager.locationID
-        items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
-
-        class ItemDetails:
-            def __init__(self, item_id, name, quantity):
-                self.item_id = item_id
-                self.name = name
-                self.quantity = quantity
-
-        item_details_list = []
-
-        for item in items_list:
-            temp = Order.objects.filter(pk=order_id)
-            item_name = ItemCatalogue.objects.get(pk=item).get_name()
-            item_quantity = temp[0].getItemQuantity(item)
-            item_details_list.append(ItemDetails(item, item_name, item_quantity))
-
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
-
-        buffer = BytesIO()
-        c = canvas.Canvas(buffer, pagesize=portrait(letter))
-        c.setTitle("order"+str(order_id))
-        # Borders
-        c.line(60, 720, 550, 720)
-        c.line(60, 720, 60, 50)
-        c.line(60, 50, 550, 50)
-        c.line(550, 720, 550, 50)
-
-        directory = os.path.dirname(__file__)
-        logo = os.path.join(directory, 'media/qm_logo.jpg')
-      # c.drawImage(logo, 80, 610, width=120, height=100)
-
-        c.line(60, 595, 550, 595)  # Horizontal line
-        c.line(220, 595, 220, 720)  # Vertical line
-        c.setFont('Helvetica', 12, leading=None)
-        print_time = str(datetime.date.today())
-        c.drawRightString(540, 700, "Order #"+str(order_id))
-        c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
-        c.drawString(230, 685, "Processed on: " + print_time)
-        c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
-        c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
-        c.drawString(307, 640, "(22.269660, 114.131303, 163)")
-        c.line(220, 630, 550, 630)
-
-        c.setFont('Helvetica', 23, leading=None)
-        if order.priority == 1:
-            package_title = "ASP HIGH-PRIORITY PKG"
-        elif order.priority == 2:
-            package_title = "ASP MEDIUM-PRIORITY PKG"
-        else:
-            package_title = "ASP LOW-PRIORITY PKG"
-
-        c.drawCentredString(385, 605, package_title)
-
-        c.setFont('Helvetica', 15, leading=None)
-        c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
-        c.drawString(138, 555, clinic.name)
-        c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
-
-        c.line(60, 525, 550, 525)
-
-        styles = getSampleStyleSheet()
-        styles['Normal'].fontName = 'Times-Bold'
-        styles['Normal'].fontSize = 12
-        style = ParagraphStyle(
-            name='Body',
-            fontName='Times-Roman',
-            fontSize=12,
-        )
-
-        width, height = letter
-        data = [[Paragraph("ID", styles['Normal']),
-                 Paragraph("Name", styles['Normal']),
-                 Paragraph("Quantity", styles['Normal'])],
-                ]
-
-        for item in item_details_list:
-            item_data = [Paragraph(str(item.item_id), style), Paragraph(item.name, style), Paragraph(str(item.quantity), style)]
-            data.append(item_data)
-
-
-        table = Table(data, colWidths=[30, 350, 70])
-
-        table.setStyle(TableStyle(
-            [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-             ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
-             ('VALIGN', (0, 0), (-1, 0), 'TOP'),
-             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
-
-        table.wrapOn(c, width, height)
-        table.wrapOn(c, width, height)
-        table.drawOn(c, 80, 300)
-
-        c.showPage()
-        c.save()
-
-        pdf = buffer.getvalue()
-        buffer.close()
-        response.write(pdf)
-
-        f = open("shipping.pdf", "wb")
-        f.write(pdf)
-        f2 = open("shipping.pdf", "r")
-        django_file = File(f2)
-        order.file = django_file
-        order.save()
-        f.close()
-        f2.close()
-        os.remove("shipping.pdf")
-
-        return response
-
-    else:
-        request.session['error'] = "Oh no!"
-        request.session['message'] = "Failed to view order"
-        return redirect('/main/wp_home')
-
-
 def dp_dashboard(request):
-    if not isUserPermitted(request, 'dp'):
-        return redirectToHome(request)
-
-    dispatcher = Dispatcher.objects.get(pk=request.session['id'])
-    orderQueue = Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
+    dispatcher=Dispatcher.objects.get(pk=request.session['id'])
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
-    nextOrders = tupleOrder[0]
-    remainingQueue = tupleOrder[1]
-    context = {
-        'nextOrders': nextOrders,
-        'dispatcher': dispatcher,
-        'orderQueue': remainingQueue,
-    }
-
+    nextOrders=tupleOrder[0]
+    remainingQueue=tupleOrder[1]
+    context={
+                    'nextOrders':nextOrders,
+                    'dispatcher':dispatcher,
+                    'orderQueue':remainingQueue,
+                }
+    
     if 'success' in request.session:
-        success = request.session['success']
+        success=request.session['success']
         del request.session['success']
-        context['success'] = success
+        context['success']=success
     if 'error' in request.session:
-        error = request.session['error']
+        error=request.session['error']
         del request.session['error']
-        context['error'] = error
+        context['error']=error
     if 'message' in request.session:
-        message = request.session['message']
+        message=request.session['message']
         del request.session['message']
-        context['message'] = message
+        context['message']=message
 
     return render(request, 'main/dp_dashboard.html', context)
 
 def dp_session(request):
-    if not isUserPermitted(request,'dp'):
-        return redirectToHome(request)
-
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
-    weight=0
-    for order in ordersToBeProcessed:
-        weight+=order.weight
-    weight=format(weight,'.2f')
     if not ordersToBeProcessed:
         remainingQueue=tupleOrder[1]
         request.session['error']="No orders to be dispatched"
         return redirect('/main/dp_dashboard')
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     context={
-                'weight':weight,
                 'nextOrders':ordersToBeProcessed,
                 'dispatcher':dispatcher,
             }
     return render(request, 'main/dp_session.html', context)
 
 def itineraryDownload(request):
-    if not isUserPermitted(request,'dp'):
-        return redirectToHome(request)
-
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     clinicIdList=[]
@@ -641,16 +342,13 @@ def itineraryDownload(request):
     return response
 
 def dp_close_session(request):
-    if not isUserPermitted(request,'dp'):
-        return redirectToHome(request)
-
     dispatcher=Dispatcher.objects.get(pk=request.session['id'])
     #Fetch the order currently being dispatched
-    orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
+    orderQueue=Order.objects.filter(status=statusToInt("Queued for Processing")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
     #send email confirmation to clinic managers
-    #sendDispatchedEmail(ordersToBeProcessed)
+    sendDispatchedEmail(ordersToBeProcessed)
     #log orders, save it to OrderRecord
     for order in ordersToBeProcessed:
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
@@ -659,103 +357,6 @@ def dp_close_session(request):
         orderRecord.save()
 
     return redirect('/main/dp_dashboard')
-
-def logout(request):
-    userLogout(request)
-    return redirect('/main/login')
-
-def myorders(request):
-    if not isUserPermitted(request,'cm'):
-        return redirectToHome(request)
-    clinicMan= ClinicManager.objects.get(pk=request.session['id'])
-    openOrdersObj=Order.objects.filter(Q(clinicID=clinicMan) & ~Q(status=5)).order_by('-orderDateTime')
-    openOrders=[] #tuples lists
-    for order in openOrdersObj:
-        itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
-        itemsTup=[]
-        for itemid in itemsObj:
-            item=ItemCatalogue.objects.get(pk=itemid['itemID'])
-            itemQuantity=order.getItemQuantity(item)
-            tup=(item.name, itemQuantity)
-            itemsTup.append(tup)
-        if order.status==1:
-            action="cancel"
-        elif order.status==4:
-            action="confirm"
-        else:
-            action="none"
-        orderTup=(order.id, intToStatus(order.status),intToPriority(order.priority), itemsTup, format(order.weight,'.2f'), order.orderDateTime, action)
-        openOrders.append(orderTup)
-
-    finishedOrdersObj=Order.objects.filter(Q(clinicID=clinicMan) & Q(status=5)).order_by('-orderDateTime')
-    finishedOrders=[] #tuples list
-    for order in finishedOrdersObj:
-        itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
-        itemsTup=[]
-        for itemid in itemsObj:
-            item=ItemCatalogue.objects.get(pk=itemid['itemID'])
-            itemQuantity=order.getItemQuantity(item)
-            tup=(item.name, itemQuantity)
-            itemsTup.append(tup)
-        recordObj=OrderRecord.objects.get(orderID=order)
-        orderTup=(order.id, intToPriority(order.priority), itemsTup, format(order.weight,'.2f'), order.orderDateTime, recordObj.deliveredDateTime)
-        finishedOrders.append(orderTup)
-
-    context={
-                'openOrders':openOrders,
-                'orderHistory':finishedOrders,
-                'clinicManager':clinicMan,
-            }
-    if 'success' in request.session:
-        success=request.session['success']
-        del request.session['success']
-        context['success']=success
-    if 'error' in request.session:
-        error=request.session['error']
-        del request.session['error']
-        context['error']=error
-    if 'message' in request.session:
-        message=request.session['message']
-        del request.session['message']
-        context['message']=message
-    return render(request, 'main/cm_myorders.html', context)
-
-def deleteOrder(request):
-    orderID=int(request.GET.get('order'))
-    order=Order.objects.get(pk=orderID)
-    order.delete()
-    return redirect('/main/myorders')
-
-def confirmReceived(request):
-    orderID=int(request.GET.get('order'))
-    order=Order.objects.get(pk=orderID)
-    order.status=statusToInt("Delivered")
-    order.save()
-
-    record=OrderRecord.objects.get(orderID=order)
-    record.deliveredDateTime=datetime.datetime.now()
-    record.save()
-
-    return redirect('/main/myorders')
-
-def orderRecords(request):
-    allOrder=Order.objects.filter(status=5).order_by('orderDateTime')
-    finishedOrders=[]
-    for order in allOrder:
-        itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
-        itemsTup=[]
-        for itemid in itemsObj:
-            item=ItemCatalogue.objects.get(pk=itemid['itemID'])
-            itemQuantity=order.getItemQuantity(item)
-            tup=(item.name, itemQuantity)
-            itemsTup.append(tup)
-        recordObj=OrderRecord.objects.get(orderID=order)
-        orderTup=(order.id, intToPriority(order.priority), itemsTup, format(order.weight,'.2f'), order.orderDateTime, recordObj.deliveredDateTime, order.clinicID.fullName(), order.clinicID.locationID.name)
-        finishedOrders.append(orderTup)
-    context={
-        'orderHistory':finishedOrders,
-        }
-    return render(request, 'main/orderRecords.html', context)
 
 def debug(request):
     # # #adding item to cart
@@ -788,11 +389,10 @@ def debug(request):
     #     itemInCart[i].delete()
     # return HttpResponse("deleted")
     
-    # #migrate cart to order simulator
-    # cartObj=Cart.objects.get(clinicID__id=3)
-    # priority= priorityToInt("High")
-    # cartToOrder(cartObj, priority)
-
+    #migrate cart to order simulator
+    cartObj=Cart.objects.get(clinicID__id=3)
+    priority= priorityToInt("High")
+    cartToOrder(cartObj, priority)
 
     # #output all orders
     # orderList=Order.objects.all().order_by('priority','orderDateTime')
@@ -830,24 +430,7 @@ def debug(request):
     #     name+=str(order.id)
     #     name+="<br>"
     # return HttpResponse(name)
-
-    # #get item quantity in order
-    # order=Order.objects.get(pk=38)
-    # return HttpResponse(order.getItemQuantity(10))
-
-    # #get clinic distance from another clinic
-    # clinic= Clinic.objects.get(pk=1)
-    # target=Clinic.objects.get(pk=2)
-    # return HttpResponse(clinic.calc_dist(target))
-    # del request.session['success']
-    # return HttpResponse("ok")
-    # #delete all sessions
-    # keys=[]
-    # for key, value in request.session.items():
-    #     keys.append(key)
-    # for key in keys:
-    #     del request.session[key]
-    # return redirect('/main/login')
+    return redirect('/main/logincm')
     #return HttpResponse(datetime.datetime.now())
-    return HttpResponse("nothing to see here")
+
     pass
