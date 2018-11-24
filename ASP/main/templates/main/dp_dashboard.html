@@ -1,6 +1,22 @@
 {%extends "main/dp_base.html"%}
 
+
+{% for message in messages %}
+<div class="alert alert-dismissible">
+    <a class="close" href="/main/login" data-dismiss="alert" aria-label="Close">×</a>
+    <center><font color="red">{{ message }}</font></center>
+</div>
+{% endfor %} 
+
 {%block content%}
+
+{% for message in messages %}
+<div class="alert alert-dismissible">
+    <a class="close" href="/main/login" data-dismiss="alert" aria-label="Close">×</a>
+    <center>{{ message }}</center>
+</div>
+{% endfor %}  
+
 <div class="container" > 
             <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
                 <div class="col-md6 n8_content_title-big" style ="color: #45b7a7;">

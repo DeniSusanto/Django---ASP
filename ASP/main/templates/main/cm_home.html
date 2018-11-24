@@ -1,6 +1,15 @@
 {%extends "main/cm_base.html"%}
 
+
 {%block content%}
+
+{% for message in messages %}
+<div class="alert alert-dismissible">
+    <a class="close" href="/main/login" data-dismiss="alert" aria-label="Close">×</a>
+    <center>{{ message }}</center>
+</div>
+{% endfor %}   
+
 <div class="n8_container n8_center_block">
     <form class="form-inline" action="" method="post" style="margin-right:calc(1.5vw + 1.5vh);">{% csrf_token %}
         <div class="form-group mx-sm-3 mb-2">
