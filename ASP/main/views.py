@@ -518,7 +518,7 @@ def pdf_download(request):
 
         directory = os.path.dirname(__file__)
         logo = os.path.join(directory, 'media/qm_logo.jpg')
-      # c.drawImage(logo, 80, 610, width=120, height=100)
+        c.drawImage(logo, 80, 610, width=120, height=100)
 
         c.line(60, 595, 550, 595)  # Horizontal line
         c.line(220, 595, 220, 720)  # Vertical line
@@ -529,7 +529,7 @@ def pdf_download(request):
         c.drawString(230, 685, "Processed on: " + print_time)
         c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
         c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
-        c.drawString(307, 640, "(22.269660, 114.131303, 163)")
+        c.drawString(307, 640, "(22.270257, 114.131376, 161)")
         c.line(220, 630, 550, 630)
 
         c.setFont('Helvetica', 23, leading=None)
