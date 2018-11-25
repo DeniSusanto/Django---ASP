@@ -74,11 +74,6 @@ def registration(request):
                 if (userCounter == 1):
                     return render(request,'main/registration.html',context)
                 Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
-            # elif(userType==4):
-            #     userCounter = HospitalAuthority.objects.filter(username=username).count()
-            #     if (userCounter == 1):
-            #         return render(request,'main/registration.html',context)
-            #     HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
         Token.objects.filter(token=token).delete()
         return render(request,'main/login.html')
     else :
@@ -100,6 +95,33 @@ def registration(request):
             return render(request,'main/registration.html',context)
     return render(request,'main/registration.html')
             
+def edit_profile(request):
+   if (request.method=='GET'):
+
+    else:
+        clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+        firstName=request.POST.get('firstName')
+        lastName =request.POST.get('lastName')
+        username =request.POST.get('username')
+        password =request.POST.get('password')
+        password1 = request.POST.get('password1')
+        image    =request.FILES['image']
+        context ={
+                    'firstName' : firstName,
+                    'lastName'  : lastName,
+                    'username'  : username,
+                    'image'     : image,
+                    'error'     : 1,
+                }
+        if(password!=password1):
+            return render(request,'main/edit_profile.html',context)
+
+        clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+
+        
+        
+
+
 
 def loginSession(request):
     if 'id' in request.session and 'role' in request.session:
