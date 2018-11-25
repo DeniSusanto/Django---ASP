@@ -130,15 +130,59 @@ def loginSession(request):
                 request.session['role']="dp"
                 Dispatcher.objects.get(pk=request.session['id'])
                 return redirect('/main/dp_dashboard')
-            # elif ha.count() > 0:
-            #     request.session['id']=ha[0].id
-            #     request.session['role']="ha"
-            #     HospitalAuthority.objects.get(pk=request.session['id'])
-            #     return redirect()
             else: #data doesnt match any user records
                 messages.error(request,'The Username or Password Entered is Incorrect. Please Try Again.')
                 return redirect('/main/login')
 
+def change_password(request):
+    if(request.method=='GET'): #return just the homepage
+        if 'message' in request.session:
+            del request.session['message']
+            context['message']=message
+        role=request.session['role']
+        if role=='cm':
+            username=ClinicManager.objects.get(pk=request.session['id']).username
+        elif role == 'dp':
+            username=Dispatcher.objects.get(pk=request.session['id']).username 
+        else:
+            username=WarehousePersonnel.objects.get(pk=request.session['id']).username
+        context={
+                'username':username,
+                'role':role,
+                }
+        return render(request, 'main/change_password.html', context)
+    else: 
+        pw=request.POST.get('password')
+        pw2=request.POST.get('password2')
+        role=request.POST.get('role')
+        if role == 'cm':
+            user=ClinicManager.objects.get(pk=request.session['id'])
+        elif role == 'dp':
+            user=Dispatcher.objects.get(pk=request.session['id']) 
+        else:
+            user=WarehousePersonnel.objects.get(pk=request.session['id'])
+        #double entry validation
+        if(pw == pw2): 
+            if user.password == pw:
+                messages.error(request,'Please enter a new password. Current entry already exists in the database.')
+                return redirect('/main/change_password')
+            else:
+                user.password = pw
+                user.save()
+                if role=='cm':
+                    messages.error(request,'Password has been updated.')
+                    return redirect('/main/cm_home')  
+                    #how to display message in cm_home without using messages.error
+                    #return render(request, "/main/cm_home.html")
+                elif role=='dp':
+                    messages.error(request,'Password has been updated.')
+                    return redirect('/main/dp_dashboard')  
+                else:
+                    messages.error(request,'Password has been updated.')
+                    return redirect("/main/wp_home")  
+        else:
+            messages.error(request,'The passwords entered do not match. Please try again.')
+            return redirect('/main/change_password')        
 
 def onlineOrder(request):
     if not isUserPermitted(request,'cm'):
