@@ -1,0 +1,51 @@
+{% load static %}
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css?family=Francois+One|Lobster|Pacifico|Sanchez|Tajawal" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{% static 'main/nav8_style.css' %}">
+        <title>
+        {%if title%}
+        ASP - {{title}}
+        {%else%}
+        ASP
+        {%endif%}
+        </title>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand navbar-dark bg-dark n8_navbar">
+            <!-- Navbar content -->
+            <a class="navbar-brand n8_navbar_title" href="{%url "cm_home"%}" style="font-family:Lobster;">Air Supply - Pilot</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </nav>
+
+        <div class="container d-flex justify-content-center">
+            <div class="jumbotron my-auto">
+                {%if error%}
+                    <center><font color="red">Username already exists</font></center>
+                {%endif%}
+                <br>
+            <form class="form-inline" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+                <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
+                    <tr><td colspan='2'><center><h2>Sign Up</h2></center></td></tr>
+                    <tr><td>First Name:</td><td><input type="text" name="firstName" value={{firstName}}></td></tr>
+                    <tr><td>Last Name:</td><td><input type="text" name="lastName" value={{lastName}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" value={{username}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" value={{password}}></td></tr>
+                    <tr><td>Confirm Password:</td><td><input type="password" name="password" value={{password1}}></td></tr>
+                    <tr><td>Image:</td><td><input type="file" name="image"></td></tr>
+                    <tr><td colspan='2'><center><input class="btn btn-light" type="submit" value="Save"></center></td></tr>
+                </table>
+            </form>  
+            </div>  
+        </div>
+    </body>
+</html>
