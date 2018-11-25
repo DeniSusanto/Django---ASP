@@ -7,8 +7,7 @@ from sys import float_info
 from .models import *
 from django.shortcuts import redirect
 from django.db.models import Q
-
-
+from django.core.mail import EmailMessage
 class Priority(Enum):
     HIGH = 1
     MEDIUM = 2
@@ -136,9 +135,15 @@ def routePlanner(clinics):
     leg_list.append("(" + str.format('{0:.6f}', queen_mary.lat) + "," + str.format('{0:.6f}', queen_mary.longitude) + "," + str(queen_mary.alt) + ")")
     return leg_list
 
-# def sendDispatchedEmail(orders):
-#     for order in orders:
-#         cmEmail=order.clinicID.email
+def sendDispatchedEmail(orders):
+    for order in orders:
+        cmEmail=order.clinicID.email
+        subject="Your order " +str(order.id) + " have been dispatched"
+        message= "Dear " + order.clinicID.fullName() + ", \n" + "Your order have been dispatched and currently in your way." + " You can find the shipping information attached in this email \n \n" + "Thank you"
+        fromEmail='navig8.comp3297@gmail.com'
+        completeMail=EmailMessage(subject, message, fromEmail, cmEmail, attachments=order.file)
+        completeMail.send(fail_silently=False)
+        
         
 def userLogout(request):
     request.session.flush()
