@@ -115,23 +115,16 @@ def edit_profile(request):
         if(password!=password1):
             return render(request,'main/edit_profile.html',context)
     else:
-        if (request.method=='POST'):
-            firstName= ClinicMan.firstName
-            lastName = ClinicMan.lastName
-            username = ClinicMan.username
-            password = ClinicMan.password
-            password1 = ClinicMan.password1
-            image    =request.FILES['image']
-            context ={
-                        'firstName' : firstName,
-                        'lastName'  : lastName,
-                        'username'  : username,
-                        'password'  : password,
-                        'password1' : password1,
-                        'image'     : image,
-                        'error'     : 1,
-                    }
-    return render(request,'main/edit_profile.html')
+        firstName= clinicMan.firstName
+        lastName = clinicMan.lastName
+        username = clinicMan.username
+        image    = clinicMan.image
+        context ={
+            'firstName' : firstName,
+            'lastName'  : lastName,
+            'username'  : username,
+        }
+    return render(request,'main/edit_profile.html',context)
 
 def loginSession(request):
     if 'id' in request.session and 'role' in request.session:
