@@ -591,12 +591,12 @@ def pdf_download(request):
 
         f = open("shipping.pdf", "wb")
         f.write(pdf)
-        f2 = open("shipping.pdf", "r")
-        django_file = File(f2)
+        f.close()
+        f = open("shipping.pdf", "r")
+        django_file = File(f)
         order.file = django_file
         order.save()
         f.close()
-        f2.close()
         os.remove("shipping.pdf")
 
         return response
@@ -892,5 +892,98 @@ def debug(request):
     #     del request.session[key]
     # return redirect('/main/login')
     #return HttpResponse(datetime.datetime.now())
-    return HttpResponse("nothing to see here")
+
+    # #save file pdf
+    # clinic_manager=ClinicManager.objects.get(username="sarah")
+    # clinic=clinic_manager.locationID
+    # order=Order.objects.get(pk=79)
+    # order_id= order.id
+    # buffer = BytesIO()
+    # c = canvas.Canvas(buffer, pagesize=portrait(letter))
+    # c.setTitle("order"+str(order_id))
+    # # Borders
+    # c.line(60, 720, 550, 720)
+    # c.line(60, 720, 60, 50)
+    # c.line(60, 50, 550, 50)
+    # c.line(550, 720, 550, 50)
+
+    # directory = os.path.dirname(__file__)
+    # logo = os.path.join(directory, 'media/qm_logo.jpg')
+    # # c.drawImage(logo, 80, 610, width=120, height=100)
+
+    # c.line(60, 595, 550, 595)  # Horizontal line
+    # c.line(220, 595, 220, 720)  # Vertical line
+    # c.setFont('Helvetica', 12, leading=None)
+    # print_time = str(datetime.date.today())
+    # c.drawRightString(540, 700, "Order #"+str(order_id))
+    # c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
+    # c.drawString(230, 685, "Processed on: " + print_time)
+    # c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
+    # c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
+    # c.drawString(307, 640, "(22.269660, 114.131303, 163)")
+    # c.line(220, 630, 550, 630)
+
+    # c.setFont('Helvetica', 23, leading=None)
+    # if order.priority == 1:
+    #     package_title = "ASP HIGH-PRIORITY PKG"
+    # elif order.priority == 2:
+    #     package_title = "ASP MEDIUM-PRIORITY PKG"
+    # else:
+    #     package_title = "ASP LOW-PRIORITY PKG"
+
+    # c.drawCentredString(385, 605, package_title)
+
+    # c.setFont('Helvetica', 15, leading=None)
+    # c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
+    # c.drawString(138, 555, clinic.name)
+    # c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
+
+    # c.line(60, 525, 550, 525)
+
+    # styles = getSampleStyleSheet()
+    # styles['Normal'].fontName = 'Times-Bold'
+    # styles['Normal'].fontSize = 12
+    # style = ParagraphStyle(
+    #     name='Body',
+    #     fontName='Times-Roman',
+    #     fontSize=12,
+    # )
+
+    # width, height = letter
+    # data = [[Paragraph("ID", styles['Normal']),
+    #             Paragraph("Name", styles['Normal']),
+    #             Paragraph("Quantity", styles['Normal'])],
+    #         ]
+
+
+
+    # table = Table(data, colWidths=[30, 350, 70])
+
+    # table.setStyle(TableStyle(
+    #     [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+    #         ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+    #         ('VALIGN', (0, 0), (-1, 0), 'TOP'),
+    #         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    #         ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
+
+    # table.wrapOn(c, width, height)
+    # table.wrapOn(c, width, height)
+    # table.drawOn(c, 80, 300)
+
+    # c.showPage()
+    # c.save()
+
+    # pdf = buffer.getvalue()
+    # buffer.close()
+
+    # f = open("shipping.pdf", "wb")
+    # f.write(pdf)
+    # f.close()
+    # f = open("shipping.pdf", "r")
+    # django_file = File(f)
+    # order.file = django_file
+    # order.save()
+    # f.close()
+    # os.remove("shipping.pdf")
+    # return HttpResponse("nothing to see here")
     pass
