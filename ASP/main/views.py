@@ -693,15 +693,14 @@ def dp_close_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
-    #send email confirmation to clinic managers
-    sendDispatchedEmail(ordersToBeProcessed)
     #log orders, save it to OrderRecord
     for order in ordersToBeProcessed:
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
         order.status=statusToInt("Dispatched")
         order.save()
         orderRecord.save()
-
+    #send email confirmation to clinic managers
+    sendDispatchedEmail(ordersToBeProcessed)
     return redirect('/main/dp_dashboard')
 
 def logout(request):
