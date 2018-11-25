@@ -137,11 +137,12 @@ def routePlanner(clinics):
 
 def sendDispatchedEmail(orders):
     for order in orders:
-        cmEmail=order.clinicID.email
+        cmEmail=(order.clinicID.email, )
         subject="Your order " +str(order.id) + " have been dispatched"
-        message= "Dear " + order.clinicID.fullName() + ", \n" + "Your order have been dispatched and currently in your way." + " You can find the shipping information attached in this email \n \n" + "Thank you"
+        message= "Dear " + order.clinicID.fullName() + ", \n" + "Your order have been dispatched and currently in your way.\n" + " You can find the shipping information attached in this email \n \n" + "Thank you"
         fromEmail='navig8.comp3297@gmail.com'
-        completeMail=EmailMessage(subject, message, fromEmail, cmEmail, attachments=order.file)
+        completeMail=EmailMessage(subject, message, fromEmail, cmEmail)
+        completeMail.attach_file(order.file.path)
         completeMail.send(fail_silently=False)
         
         
