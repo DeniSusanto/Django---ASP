@@ -96,10 +96,9 @@ def registration(request):
     return render(request,'main/registration.html')
             
 def edit_profile(request):
-   if (request.method=='GET'):
-
-    else:
-        clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+    #clinicMan=ClinicManager.objects.get(pk=request.session['id'])
+    clinicMan=ClinicManager.objects.get(pk=1)
+    if (request.method=='POST'):
         firstName=request.POST.get('firstName')
         lastName =request.POST.get('lastName')
         username =request.POST.get('username')
@@ -115,13 +114,24 @@ def edit_profile(request):
                 }
         if(password!=password1):
             return render(request,'main/edit_profile.html',context)
-
-        clinicMan=ClinicManager.objects.get(pk=request.session['id'])
-
-        
-        
-
-
+    else:
+        if (request.method=='POST'):
+            firstName= ClinicMan.firstName
+            lastName = ClinicMan.lastName
+            username = ClinicMan.username
+            password = ClinicMan.password
+            password1 = ClinicMan.password1
+            image    =request.FILES['image']
+            context ={
+                        'firstName' : firstName,
+                        'lastName'  : lastName,
+                        'username'  : username,
+                        'password'  : password,
+                        'password1' : password1,
+                        'image'     : image,
+                        'error'     : 1,
+                    }
+    return render(request,'main/edit_profile.html')
 
 def loginSession(request):
     if 'id' in request.session and 'role' in request.session:
