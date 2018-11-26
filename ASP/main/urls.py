@@ -17,8 +17,9 @@ urlpatterns = [
     url(r'^logout$', views.logout, name='logout'),
     url(r'^order_record$', views.orderRecords, name='order_record'),
     url(r'^change_password$', views.change_password, name='change_password'),
-    url(r'^edit_profile$', views.edit_profile, name='edit_profile'),
-
+    url(r'^forget_password$', views.forget_password, name='forget_password'),
+    url(r'^reset_password$', views.reset_password, name='reset_password'),
+    #url(r'^email_close_session$', views.email_close_session, name='email_close_session'),
     #CM
     url(r'^cm_home$', views.onlineOrder, name='cm_home'),
     url(r'^cm_cart$', views.cm_cart, name='cm_cart'),
