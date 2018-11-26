@@ -101,7 +101,6 @@ def registration(request):
             return render(request,'main/registration.html',context)
     return render(request,'main/registration.html')
             
-<<<<<<< HEAD
 def edit_profile(request):
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
@@ -221,8 +220,6 @@ def edit_profile(request):
             'dispatcher' : dispatcher,
         }
         return render(request,'main/edit_profile.html',context)
-=======
->>>>>>> abe680fc6b0d5557c02e3ae79fde49dc71e106c8
 
 def loginSession(request):
     if 'id' in request.session and 'role' in request.session:
