@@ -1,3 +1,10 @@
+{% if role == cm %}
+    {% extends "main/cm_base.html"%}
+{% else if role == wp %}
+    {% extends "main/wp_base.html"%}
+{% else }
+    {% extends "main/dp_base.html"%}
+{%endif%}
 {% load static %}
 <html lang="en">
     <head>
