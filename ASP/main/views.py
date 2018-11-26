@@ -100,10 +100,13 @@ def registration(request):
 def edit_profile(request):
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
+        page = "main/cm_base.html"
     elif(request.session['role']=="wp"):
         currentUser=WarehousePersonnel.objects.get(pk=request.session['id'])
+        page = "main/wp_base.html"
     elif(request.session['role']=="dp"):
         currentUser=Dispatcher.objects.get(pk=request.session['id'])
+        page = "main/dp_base.html"
 
     if (request.method=='POST'):
         firstName=request.POST.get('firstName')
@@ -113,49 +116,52 @@ def edit_profile(request):
         image=request.FILES.get('image', currentUser.image)
         usernameColor="black"
         emailColor="black"
+        clinicManager = currentUser
+        warehouse = currentUser
+        dispatcher = currentUser
         error=[]
 
         if(request.session['role']=="cm"):
             userCounter = ClinicManager.objects.filter(username=username).count()
             emailCounter = ClinicManager.objects.filter(email=email).count()
             if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
-                error.append("Username and Email already exist.")
+                error="Username and Email already exist."
                 usernameColor="red"
                 emailColor="red"
             else:
                 if (username!=currentUser.username and userCounter == 1): #username already exists
-                    error.append("Username already exists.")
+                    error="Username already exists."
                     usernameColor="red"
                 elif (email!=currentUser.email and emailCounter == 1): #email already exists
-                    error.append("Email already exists.")
+                    error="Email already exists."
                     emailColor="red"
         elif(request.session['role']=="wp"):
             userCounter = WarehousePersonnel.objects.filter(username=username).count()
             emailCounter = WarehousePersonnel.objects.filter(email=email).count()
             if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
-                error.append("Username and Email already exist.")
+                error="Username and Email already exist."
                 usernameColor="red"
                 emailColor="red"
             else:
                 if (username!=currentUser.username and userCounter == 1): #username already exists
-                    error.append("Username already exists.")
+                    error="Username already exists."
                     usernameColor="red"
                 elif (email!=currentUser.email and emailCounter == 1): #email already exists
-                    error.append("Email already exists.")
+                    error="Email already exists."
                     emailColor="red"
         elif(request.session['role']=="dp"):
             userCounter = Dispatcher.objects.filter(username=username).count()
             emailCounter = Dispatcher.objects.filter(email=email).count()
             if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
-                error.append("Username and Email already exist.")
+                error="Username and Email already exist."
                 usernameColor="red"
                 emailColor="red"
             else:
                 if (username!=currentUser.username and userCounter == 1): #username already exists
-                    error.append("Username already exists.")
+                    error="Username already exists."
                     usernameColor="red"
                 elif (email!=currentUser.email and emailCounter == 1): #email already exists
-                    error.append("Email already exists.")
+                    error="Email already exists."
                     emailColor="red"
         context ={
                     'firstName'     : firstName,
@@ -165,7 +171,12 @@ def edit_profile(request):
                     'error'         : error,
                     'usernameColor' : usernameColor,
                     'emailColor'    : emailColor,
-                    'image'         : image
+                    'image'         : image,
+                    'role'          : request.session['role'],
+                    'page'          : page,
+                    'clinicManager' : clinicManager,
+                    'warehouse' : warehouse,
+                    'dispatcher' : dispatcher,
                 }
         if(len(error)>0):
             return render(request,'main/edit_profile.html',context)
@@ -188,12 +199,21 @@ def edit_profile(request):
         username = currentUser.username
         email = currentUser.email
         image    = currentUser.image
+        clinicManager = currentUser
+        warehouse = currentUser
+        dispatcher = currentUser
+
         context ={
             'firstName' : firstName,
             'lastName'  : lastName,
             'username'  : username,
             'email'     : email,
-            'image'     : image
+            'image'     : image,
+            'role'      : request.session['role'],
+            'page'      : page,
+            'clinicManager' : clinicManager,
+            'warehouse' : warehouse,
+            'dispatcher' : dispatcher,
         }
         return render(request,'main/edit_profile.html',context)
 

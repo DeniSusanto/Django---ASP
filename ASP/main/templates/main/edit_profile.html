@@ -1,42 +1,7 @@
-{% if role == cm %}
-    {% extends "main/cm_base.html"%}
-{% else if role == wp %}
-    {% extends "main/wp_base.html"%}
-{% else }
-    {% extends "main/dp_base.html"%}
-{%endif%}
+{% extends page %}
+{% block content %}
 {% load static %}
-<html lang="en">
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <link href="https://fonts.googleapis.com/css?family=Francois+One|Lobster|Pacifico|Sanchez|Tajawal" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="{% static 'main/nav8_style.css' %}">
-        <title>
-        {%if title%}
-        ASP - {{title}}
-        {%else%}
-        ASP
-        {%endif%}
-        </title>
-    </head>
-
     <body>
-        <nav class="navbar navbar-expand navbar-dark bg-dark n8_navbar">
-            <!-- Navbar content -->
-            <a class="navbar-brand n8_navbar_title" href="{%url "cm_home"%}" style="font-family:Lobster;">Air Supply - Pilot</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </nav>
-        {%for err in error%}
-            <a class="close" href="/main/edit_profile" data-dismiss="alert" aria-label="Close">×</a>
-            <center><font color="red">{{err}}</font></center><br>
-        {%endfor%}
         <br>
         <div class="container d-flex justify-content-center">
             <div class="jumbotron my-auto"> 
@@ -56,3 +21,4 @@
         <br>
     </body>
 </html>
+{% endblock %}
