@@ -6,8 +6,8 @@ from django.db.models import Count
 from django.template import RequestContext
 from django.contrib import messages
 from django.conf import settings
+from django.core.mail import *
 from django.core.files.storage import FileSystemStorage
-from django.contrib.auth.models import User
 from .models import *
 from .helper import *
 from reportlab.pdfgen import canvas
@@ -54,8 +54,7 @@ def registration(request):
                     'password'  : password,
                     'image'     : image,
                     'error'     : 1,
-        }
-        
+                }
         if(userType==1):
             userCounter = ClinicManager.objects.filter(username=username).count()
             if (userCounter == 1):
@@ -76,6 +75,11 @@ def registration(request):
                 if (userCounter == 1):
                     return render(request,'main/registration.html',context)
                 Dispatcher(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
+            # elif(userType==4):
+            #     userCounter = HospitalAuthority.objects.filter(username=username).count()
+            #     if (userCounter == 1):
+            #         return render(request,'main/registration.html',context)
+            #     HospitalAuthority(firstName=firstName,lastName=lastName,username=username,password=password,email=email,image=image).save()
         Token.objects.filter(token=token).delete()
         return render(request,'main/login.html')
     else :
@@ -97,6 +101,7 @@ def registration(request):
             return render(request,'main/registration.html',context)
     return render(request,'main/registration.html')
             
+<<<<<<< HEAD
 def edit_profile(request):
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
@@ -216,6 +221,8 @@ def edit_profile(request):
             'dispatcher' : dispatcher,
         }
         return render(request,'main/edit_profile.html',context)
+=======
+>>>>>>> abe680fc6b0d5557c02e3ae79fde49dc71e106c8
 
 def loginSession(request):
     if 'id' in request.session and 'role' in request.session:
@@ -230,7 +237,6 @@ def loginSession(request):
             cm=ClinicManager.objects.filter(Q(username=uname) & Q(password=pw))
             wp=WarehousePersonnel.objects.filter(Q(username=uname) & Q(password=pw))
             dis=Dispatcher.objects.filter(Q(username=uname) & Q(password=pw))
-            ha=HospitalAuthority.objects.filter(Q(username=uname) & Q(password=pw))
             if cm.count() > 0:
                 request.session['id']=cm[0].id
                 request.session['role']="cm"
@@ -299,6 +305,73 @@ def change_password(request):
         else:
             messages.error(request,'The passwords entered do not match. Please try again.')
             return redirect('/main/change_password')        
+
+def forget_password(request):
+    if(request.method=='GET'): #return just the homepage
+        return render(request, 'main/forget_password.html')
+    else:
+        email=request.POST.get('email')
+        cm=ClinicManager.objects.filter(email=email)
+        wp=WarehousePersonnel.objects.filter(email=email)
+        dis=Dispatcher.objects.filter(email=email)
+        if (cm.count() > 0): #email exists in the database
+            username = cm[0].username
+        elif (wp.count() > 0):
+            username = wp[0].username
+        elif (dis.count() > 0):    
+            username = dis[0].username
+        else: #email does not exist in the database
+            messages.error(request, "Email entered does not exist in the database. Please try again.")    
+            return redirect('/main/forget_password')
+        e = []
+        e.append(email)
+        content = "Dear " + username + ", \n Click on the link below to reset your password: http://127.0.0.1:8000/main/reset_password?username=" + username + "\n"
+        send_mail('Reset Password',content,'navig8.comp3297@gmail.com',e,fail_silently=False,)
+        messages.error(request, 'A link to reset your password has been sent to your email.')
+        return redirect('/main/login')
+
+def reset_password(request):
+    username=request.GET.get('username')
+    if(request.method=='POST'): #process the password reset request
+        username=request.POST.get('username')
+        pw=request.POST.get('password')
+        pw2=request.POST.get('password2')
+        cm=ClinicManager.objects.filter(username=username)
+        wp=WarehousePersonnel.objects.filter(username=username)
+        dis=Dispatcher.objects.filter(username=username)
+        if cm.count() > 0: 
+            user = cm[0]
+            role = 'cm'
+        elif wp.count() > 0: 
+            user = wp[0]
+            role = 'wp'
+        else: 
+            user = dis[0]
+            role = 'dis'
+        if(pw == pw2): 
+            if user.password == pw:
+                messages.error(request,'Please enter a new password. Current entry already exists in the database.')
+                context={
+                'username':username,
+                }
+                return render(request,'main/reset_password.html', context)
+            else:
+                user.password = pw
+                user.save()
+                messages.error(request,'Password has been updated.')
+                return redirect('/main/login')
+        else:
+            messages.error(request,'The passwords entered do not match. Please try again.')
+            context={
+                'username':username,
+                }
+            return render(request,'main/reset_password.html', context)
+    else:
+        context={
+                'username':username,
+                }
+        return render(request,'main/reset_password.html', context)
+
 
 def onlineOrder(request):
     if not isUserPermitted(request,'cm'):
@@ -557,7 +630,7 @@ def wp_home(request):
 
 
 def order_details(request):
-    if not isUserPermitted(request, 'wp'):
+    if not isUserPermitted(request, 'cm'):
         return redirectToHome(request)
     if request.method == 'GET':
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
@@ -634,7 +707,7 @@ def pdf_download(request):
 
         directory = os.path.dirname(__file__)
         logo = os.path.join(directory, 'media/qm_logo.jpg')
-        c.drawImage(logo, 80, 610, width=120, height=100)
+      # c.drawImage(logo, 80, 610, width=120, height=100)
 
         c.line(60, 595, 550, 595)  # Horizontal line
         c.line(220, 595, 220, 720)  # Vertical line
@@ -645,7 +718,7 @@ def pdf_download(request):
         c.drawString(230, 685, "Processed on: " + print_time)
         c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
         c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
-        c.drawString(307, 640, "(22.270257, 114.131376, 161)")
+        c.drawString(307, 640, "(22.269660, 114.131303, 163)")
         c.line(220, 630, 550, 630)
 
         c.setFont('Helvetica', 23, leading=None)
@@ -707,12 +780,12 @@ def pdf_download(request):
 
         f = open("shipping.pdf", "wb")
         f.write(pdf)
-        f.close()
-        f = open("shipping.pdf", "r")
-        django_file = File(f)
+        f2 = open("shipping.pdf", "r")
+        django_file = File(f2)
         order.file = django_file
         order.save()
         f.close()
+        f2.close()
         os.remove("shipping.pdf")
 
         return response
@@ -809,14 +882,15 @@ def dp_close_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
+    #send email confirmation to clinic managers
+    #sendDispatchedEmail(ordersToBeProcessed)
     #log orders, save it to OrderRecord
     for order in ordersToBeProcessed:
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
         order.status=statusToInt("Dispatched")
         order.save()
         orderRecord.save()
-    #send email confirmation to clinic managers
-    sendDispatchedEmail(ordersToBeProcessed)
+
     return redirect('/main/dp_dashboard')
 
 def logout(request):
@@ -1008,98 +1082,5 @@ def debug(request):
     #     del request.session[key]
     # return redirect('/main/login')
     #return HttpResponse(datetime.datetime.now())
-
-    # #save file pdf
-    # clinic_manager=ClinicManager.objects.get(username="sarah")
-    # clinic=clinic_manager.locationID
-    # order=Order.objects.get(pk=79)
-    # order_id= order.id
-    # buffer = BytesIO()
-    # c = canvas.Canvas(buffer, pagesize=portrait(letter))
-    # c.setTitle("order"+str(order_id))
-    # # Borders
-    # c.line(60, 720, 550, 720)
-    # c.line(60, 720, 60, 50)
-    # c.line(60, 50, 550, 50)
-    # c.line(550, 720, 550, 50)
-
-    # directory = os.path.dirname(__file__)
-    # logo = os.path.join(directory, 'media/qm_logo.jpg')
-    # # c.drawImage(logo, 80, 610, width=120, height=100)
-
-    # c.line(60, 595, 550, 595)  # Horizontal line
-    # c.line(220, 595, 220, 720)  # Vertical line
-    # c.setFont('Helvetica', 12, leading=None)
-    # print_time = str(datetime.date.today())
-    # c.drawRightString(540, 700, "Order #"+str(order_id))
-    # c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
-    # c.drawString(230, 685, "Processed on: " + print_time)
-    # c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
-    # c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
-    # c.drawString(307, 640, "(22.269660, 114.131303, 163)")
-    # c.line(220, 630, 550, 630)
-
-    # c.setFont('Helvetica', 23, leading=None)
-    # if order.priority == 1:
-    #     package_title = "ASP HIGH-PRIORITY PKG"
-    # elif order.priority == 2:
-    #     package_title = "ASP MEDIUM-PRIORITY PKG"
-    # else:
-    #     package_title = "ASP LOW-PRIORITY PKG"
-
-    # c.drawCentredString(385, 605, package_title)
-
-    # c.setFont('Helvetica', 15, leading=None)
-    # c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
-    # c.drawString(138, 555, clinic.name)
-    # c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
-
-    # c.line(60, 525, 550, 525)
-
-    # styles = getSampleStyleSheet()
-    # styles['Normal'].fontName = 'Times-Bold'
-    # styles['Normal'].fontSize = 12
-    # style = ParagraphStyle(
-    #     name='Body',
-    #     fontName='Times-Roman',
-    #     fontSize=12,
-    # )
-
-    # width, height = letter
-    # data = [[Paragraph("ID", styles['Normal']),
-    #             Paragraph("Name", styles['Normal']),
-    #             Paragraph("Quantity", styles['Normal'])],
-    #         ]
-
-
-
-    # table = Table(data, colWidths=[30, 350, 70])
-
-    # table.setStyle(TableStyle(
-    #     [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-    #         ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
-    #         ('VALIGN', (0, 0), (-1, 0), 'TOP'),
-    #         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-    #         ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
-
-    # table.wrapOn(c, width, height)
-    # table.wrapOn(c, width, height)
-    # table.drawOn(c, 80, 300)
-
-    # c.showPage()
-    # c.save()
-
-    # pdf = buffer.getvalue()
-    # buffer.close()
-
-    # f = open("shipping.pdf", "wb")
-    # f.write(pdf)
-    # f.close()
-    # f = open("shipping.pdf", "r")
-    # django_file = File(f)
-    # order.file = django_file
-    # order.save()
-    # f.close()
-    # os.remove("shipping.pdf")
-    # return HttpResponse("nothing to see here")
+    return HttpResponse("nothing to see here")
     pass
