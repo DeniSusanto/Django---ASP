@@ -7,6 +7,7 @@ from django.template import RequestContext
 from django.contrib import messages
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.models import User
 from .models import *
 from .helper import *
 from reportlab.pdfgen import canvas
@@ -53,7 +54,8 @@ def registration(request):
                     'password'  : password,
                     'image'     : image,
                     'error'     : 1,
-                }
+        }
+        
         if(userType==1):
             userCounter = ClinicManager.objects.filter(username=username).count()
             if (userCounter == 1):
@@ -96,35 +98,104 @@ def registration(request):
     return render(request,'main/registration.html')
             
 def edit_profile(request):
-    #clinicMan=ClinicManager.objects.get(pk=request.session['id'])
-    clinicMan=ClinicManager.objects.get(pk=1)
+    if(request.session['role']=="cm"):
+        currentUser=ClinicManager.objects.get(pk=request.session['id'])
+    elif(request.session['role']=="wp"):
+        currentUser=WarehousePersonnel.objects.get(pk=request.session['id'])
+    elif(request.session['role']=="dp"):
+        currentUser=Dispatcher.objects.get(pk=request.session['id'])
+
     if (request.method=='POST'):
         firstName=request.POST.get('firstName')
-        lastName =request.POST.get('lastName')
-        username =request.POST.get('username')
-        password =request.POST.get('password')
-        password1 = request.POST.get('password1')
-        image    =request.FILES['image']
+        lastName=request.POST.get('lastName')
+        username=request.POST.get('username')
+        email=request.POST.get('email')
+        image=request.FILES.get('image', currentUser.image)
+        usernameColor="black"
+        emailColor="black"
+        error=[]
+
+        if(request.session['role']=="cm"):
+            userCounter = ClinicManager.objects.filter(username=username).count()
+            emailCounter = ClinicManager.objects.filter(email=email).count()
+            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
+                error.append("Username and Email already exist.")
+                usernameColor="red"
+                emailColor="red"
+            else:
+                if (username!=currentUser.username and userCounter == 1): #username already exists
+                    error.append("Username already exists.")
+                    usernameColor="red"
+                elif (email!=currentUser.email and emailCounter == 1): #email already exists
+                    error.append("Email already exists.")
+                    emailColor="red"
+        elif(request.session['role']=="wp"):
+            userCounter = WarehousePersonnel.objects.filter(username=username).count()
+            emailCounter = WarehousePersonnel.objects.filter(email=email).count()
+            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
+                error.append("Username and Email already exist.")
+                usernameColor="red"
+                emailColor="red"
+            else:
+                if (username!=currentUser.username and userCounter == 1): #username already exists
+                    error.append("Username already exists.")
+                    usernameColor="red"
+                elif (email!=currentUser.email and emailCounter == 1): #email already exists
+                    error.append("Email already exists.")
+                    emailColor="red"
+        elif(request.session['role']=="dp"):
+            userCounter = Dispatcher.objects.filter(username=username).count()
+            emailCounter = Dispatcher.objects.filter(email=email).count()
+            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
+                error.append("Username and Email already exist.")
+                usernameColor="red"
+                emailColor="red"
+            else:
+                if (username!=currentUser.username and userCounter == 1): #username already exists
+                    error.append("Username already exists.")
+                    usernameColor="red"
+                elif (email!=currentUser.email and emailCounter == 1): #email already exists
+                    error.append("Email already exists.")
+                    emailColor="red"
         context ={
-                    'firstName' : firstName,
-                    'lastName'  : lastName,
-                    'username'  : username,
-                    'image'     : image,
-                    'error'     : 1,
+                    'firstName'     : firstName,
+                    'lastName'      : lastName,
+                    'username'      : username,
+                    'email'         : email,
+                    'error'         : error,
+                    'usernameColor' : usernameColor,
+                    'emailColor'    : emailColor,
+                    'image'         : image
                 }
-        if(password!=password1):
+        if(len(error)>0):
             return render(request,'main/edit_profile.html',context)
+        else:
+            currentUser.firstName=firstName
+            currentUser.lastName=lastName
+            currentUser.username=username
+            currentUser.email=email
+            currentUser.image=image
+            currentUser.save()
+            if(request.session['role']=="cm"):
+                return redirect('/main/cm_home')
+            elif(request.session['role']=="wp"):
+                return redirect('/main/wp_home')
+            elif(request.session['role']=="dp"):
+                return redirect('/main/dp_dashboard')
     else:
-        firstName= clinicMan.firstName
-        lastName = clinicMan.lastName
-        username = clinicMan.username
-        image    = clinicMan.image
+        firstName= currentUser.firstName
+        lastName = currentUser.lastName
+        username = currentUser.username
+        email = currentUser.email
+        image    = currentUser.image
         context ={
             'firstName' : firstName,
             'lastName'  : lastName,
             'username'  : username,
+            'email'     : email,
+            'image'     : image
         }
-    return render(request,'main/edit_profile.html',context)
+        return render(request,'main/edit_profile.html',context)
 
 def loginSession(request):
     if 'id' in request.session and 'role' in request.session:

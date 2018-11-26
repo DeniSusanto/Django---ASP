@@ -26,26 +26,26 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         </nav>
-
+        {%for err in error%}
+            <a class="close" href="/main/edit_profile" data-dismiss="alert" aria-label="Close">×</a>
+            <center><font color="red">{{err}}</font></center><br>
+        {%endfor%}
+        <br>
         <div class="container d-flex justify-content-center">
-            <div class="jumbotron my-auto">
-                {%if error%}
-                    <center><font color="red">Username already exists</font></center>
-                {%endif%}
-                <br>
+            <div class="jumbotron my-auto"> 
             <form class="form-inline" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
                 <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
                     <tr><td colspan='2'><center><h2>Edit Profile</h2></center></td></tr>
                     <tr><td>First Name:</td><td><input type="text" name="firstName" value={{firstName}}></td></tr>
                     <tr><td>Last Name:</td><td><input type="text" name="lastName" value={{lastName}}></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username" value={{username}}></td></tr>
-                    <tr><td>New Password:</td><td><input type="password" name="password" value={{password}}></td></tr>
-                    <tr><td>Confirm Password:</td><td><input type="password" name="password1" value={{password1}}></td></tr>
+                    <tr><td><font color="{{usernameColor}}">Username:</font></td><td><input type="text" name="username" value={{username}}></td></tr>
+                    <tr><td><font color="{{emailColor}}">Email:</font></td><td><input type="email" name="email" value={{email}}></td></tr>
                     <tr><td>Image:</td><td><input type="file" name="image"></td></tr>
                     <tr><td colspan='2'><center><input class="btn btn-light" type="submit" value="Update"></center></td></tr>
                 </table>
             </form>  
             </div>  
         </div>
+        <br>
     </body>
 </html>
