@@ -2,63 +2,64 @@
 
 {%block content%}
 <div class="container" > 
-            <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
-                <div class="col-md6 n8_content_title-big" style ="color: #45b7a7;">
-                    Open Orders
-                </div>
-            </div>
-            <div class="row">
-                <table class="table" style="text-align:center;">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Status</th>
-                            <th>Priority</th>
-                            <th>Items</th>
-                            <th>Weight</th>
-                            <th>Order Placed</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    {%for order in openOrders%}
-                    <tr>
-                        <td>{{order.0}}</td>
-                        <td>{{order.1}}</td>
-                        <td>{{order.2}}</td>
-                        <td>
-                            <ul class="list-group" style="width: calc(18vw + 15vh);">
-                            {%for item in order.3%}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{item.0}}
-                                    <span class="badge badge-secondary badge-pill"> {{item.1}}</span>
-                                </li>
-                            {%endfor%}
-                            </ul>
-                        </td>
-                        <td>{{order.4}} kg</td>
-                        <td>{{order.5}}</td>
-                        <td>
-                        {%if order.6 == "cancel"%}
-                        <a href="{%url "deleteOrder"%}?order={{order.0}}">
-                            <button type="button" class="btn btn-primary nav8_eclipse_btn n8_content_sub_title" data-toggle="confirmation" data-title="Are you sure to cancel order?">
-                                Cancel order
-                            </button>
-                        </a>
-                        {%elif order.6 == "confirm"%}
-                        <a href="{%url "confirmReceived"%}?order={{order.0}}">
-                            <button type="button" class="btn btn-primary nav8_eclipse_btn n8_content_sub_title">
-                                Confirm Received
-                            </button>
-                        </a>
-                        {%else%}
-                        <b><h2>-</h2></b>
-                        {%endif%}
-                        </td>
-                    </tr>
-                    {%endfor%}
-                </table>
-            </div>
+    <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
+        <div class="col-md6 n8_content_title-big" style ="color: #45b7a7;">
+            Open Orders
+        </div>
     </div>
+    <div class="row shadow" style="background-color:white;">
+        <table class="table" style="text-align:center;" >
+            <thead class="thead-light">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Items</th>
+                    <th>Weight</th>
+                    <th>Order Placed</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            {%for order in openOrders%}
+            <tr>
+                <td>{{order.0}}</td>
+                <td>{{order.1}}</td>
+                <td>{{order.2}}</td>
+                <td>
+                    <ul class="list-group" style="width: calc(18vw + 15vh);">
+                    {%for item in order.3%}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{item.0}}
+                            <span class="badge badge-secondary badge-pill"> {{item.1}}</span>
+                        </li>
+                    {%endfor%}
+                    </ul>
+                </td>
+                <td>{{order.4}} kg</td>
+                <td>{{order.5}}</td>
+                <td>
+                {%if order.6 == "cancel"%}
+                <a href="{%url "deleteOrder"%}?order={{order.0}}">
+                    <button type="button" class="btn btn-primary btn-outline-light n8_content_sub_title" data-toggle="confirmation" data-title="Are you sure to cancel order?" style="background-color:#DF4343; border-radius: 10em;">
+                        Cancel order
+                    </button>
+                </a>
+                {%elif order.6 == "confirm"%}
+                <a href="{%url "confirmReceived"%}?order={{order.0}}">
+                    <button type="button" class="btn btn-primary btn-outline-ligh n8_content_sub_title" style="background-color:#295257 ; border-radius: 10em;">
+                        Confirm Received
+                    </button>
+                </a>
+                {%else%}
+                <b><h2>-</h2></b>
+                {%endif%}
+                </td>
+            </tr>
+            {%endfor%}
+        </table>
+    </div>
+    </div>
+    <br>
     <br>
     <div class="container">    
             <div class="row">
@@ -66,7 +67,7 @@
                     Order Received History
                 </div>
             </div>
-            <div class="row">
+            <div class="row shadow" style="background-color:white;">
                 <table class="table" style="text-align:center;">
                     <thead class="thead-light">
                         <tr>

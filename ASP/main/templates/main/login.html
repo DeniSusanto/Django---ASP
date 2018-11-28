@@ -18,32 +18,37 @@
     </title>
   </head>
 
-    <body>
-        <nav class="navbar navbar-expand navbar-dark bg-dark n8_navbar">
+    <body style="background-image:url(/static/main/login.jpg); height: 100%; background-position: center; background-repeat: no-repeat; background-size: cover;">   
+        <nav class="navbar navbar-expand n8_navbar">
             <!-- Navbar content -->
-            <a class="navbar-brand n8_navbar_title" href="" style="font-family:Lobster;">Air Supply - Pilot</a>
+            <a class="navbar-brand n8_navbar_title" href="" style="font-family:Lobster;"><img src="/static/main/navig8.png"  ></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            <a class="navbar ml-auto" href="#">
+                
+                    <img src="/static/main/logo1.png"  height="30">
+                
+            </a>
         </nav>
         {% for message in messages %}
-            <div class="alert alert-dismissible">
-                <a class="close" href="/main/login" data-dismiss="alert" aria-label="Close">×</a>
-                <center><font color="red">{{ message }}</font></center>
+            <div class="container alert alert-danger alert-dismissible fade show"> 
+                    <a class="close" href="/main/forget_password" data-dismiss="alert" aria-label="Close">×</a>
+                    <center>{{ message }}</center>
             </div>
-        {% endfor %}    
-        <div class="container d-flex justify-content-center">
-            <div class="jumbotron my-auto">
-            <form class="form-inline" action='{%url "loginSession"%}' method='POST'>{% csrf_token %}
-                <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
-                <tr><td colspan='2' class="n8_navbar_title" style="font-family:Lobster;"><center><h2>Login</h2></center></td></tr>
-                <tr><td class="n8_content_sub_title">Username:</td><td><input type="text" name="username" value="{{username}}"></td></tr>
-                <tr><td class="n8_content_sub_title">Password:</td><td><input type="password" name="password" value="{{password}}"></td></tr>
-                <tr><td align='center'><a href='/main/forget_password'><center><font size='1' color='red'>forgot password?</font></a></td></tr>
-                <tr><td colspan='2'><center><input class="btn btn-primary nav8_eclipse_btn n8_content_sub_title" type="submit" value="Login"></center></td></tr>
-                </table>
+        {% endfor %}  
+        <div class="container d-flex justify-content-left align-middle">
+            <div class="jumbotron" style="background:none;">
+            <form  action='{%url "loginSession"%}' method='POST'>{% csrf_token %}
+                <div class ="form-group">
+                   <h1>Login</h1><br>
+                    <input type="text" class="form-control" name="username" value="{{username}}" placeholder="Username"><br>
+                    <input type="password" class="form-control" name="password" value="{{password}}" placeholder="Password"><br>
+                    <a href='/main/forget_password'><font size='1' color='red'>Forgot password?</font></a><br><br>
+                    <input class="btn btn-outline-light nav8_eclipse_btn n8_content_sub_title" type="submit" value="Login"></center>
+                </div>
             </form>  
-            </div>  
+            </div>
         </div>
     </body>
 </html>

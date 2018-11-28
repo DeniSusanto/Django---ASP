@@ -2,67 +2,95 @@
 
 {% block content %}
     {% load static %}
-    <div class="container">
-
-        <div class="d-flex justify-content-between" style="margin-bottom: calc(1vw + 1vh);">
-            <div class="row">
-                <div class="n8_content_title-big" style="margin-bottom: calc(1vw + 1vh);color:#bc1602;">
+    <div class="container" >
+        <div class="row">
+                <div class="n8_content_title-big" style="margin-bottom: calc(1vw + 1vh);color:#314E6C;">
                     Order #{{ order.id }} details
                 </div>
+        </div>
+    </div>
+    <div class="container shadow p-3 mb-5 bg-white rounded" style="background-color:rgb(248,248,248)">
+        
+            <div class="row">
+                <div class="col my-2" >
+                    <h4 style="color:rgb(49,78,108)">Ordered by</h4>
+                    <b>{{ cm.locationID.name }} ({{ cm.firstName }} {{ cm.lastName }})</b>
+                </div>
+                <div class="col my-2" style="text-align:right">
+                    <h4 style="color:rgb(49,78,108)">Priority</h5>
+                    {%if priorityString is High%}
+                        <h5 style="color:rgb(223,67,67)">
+                    
+                    {%elif priorityString is Medium%}
+                        <h5 style="color:rgb(49, 78, 108)">
+                    
+                    {%else%}
+                        <h5 style="color:#314e6c">
+                    {%endif%}
+                    {{ order.priorityString }} </h5>
+                    
+                </div>
             </div>
-            <div class="col-md6"><a href="{% url "wp_home" %}">
-
+            <br>
+            <div class="row">
+                <div class="col">
+                <table class="table table-bordered">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                        </tr>
+                        </thead>
+                        {% for item in item_details %}
+                            <tr>
+                                <td>{{ item.item_id }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h5>Weight: {{ order.weightRound }} kg</h5>
+                </div>
+            </div>
+            
+            
+            
+        <br>
+    
+        
+    </div>
+    
+    <div class="container">
+        <br>
+        {% if type != 'process' %}
+        <div style="display: inline-block; float: right;margin-right:calc(0.5vw + 0.5vh);">
+            <form class="form-inline" action="{% url "pdf_download" %}" method="post">{% csrf_token %}
+                        <input type="hidden" name="id" value={{ order.id }}>
+                        <input class="btn btn-outline-secondary n8_content_sub_title" type="submit" value="Download Shipping Label" style="border-radius: 10em;" >
+                    </form>
+        </div>
+        {% endif %}
+        <div class="col-md6"><a href="{% url "wp_home" %}">
                 {% if type == 'process' %}
                     <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
                         <input type="hidden" name="order" value={{ order.id }}>
                         <input type="hidden" name="type" value="process">
-                        <input class="btn btn-success nav8_eclipse_btn n8_content_sub_title" type="submit" value="Begin Processing">
+                        <input class="btn btn-outline-light btn-success n8_content_sub_title" type="submit" value="Begin Processing" style="border-radius: 10em; background-color:rgb(49,78,108);">
                     </form>
                 {% else %}
                     <form class="form-inline" action="{% url "wp_home" %}" method="post">{% csrf_token %}
                         <input type="hidden" name="order" value={{ order.id }}>
                         <input type="hidden" name="type" value="dispatch">
-                        <input class="btn btn-success nav8_eclipse_btn n8_content_sub_title" type="submit" value="Confirm Completion" data-toggle="confirmation" data-title="Completed?">
+                        <input class="btn btn-outline-light btn-success n8_content_sub_title" type="submit" value="Confirm Completion" data-toggle="confirmation" data-title="Completed?" style="border-radius: 10em; background-color:rgb(49,78,108);">
                     </form>
                 {% endif %}
             </a>
-            </div>
         </div>
-
-
-        Ordered by: {{ cm.firstName }} {{ cm.lastName }} <br>
-        From: {{ cm.locationID.name }} <br>
-        Priority: {{ order.priorityString }} <br>
-        Weight: {{ order.weightRound }} kg<br>
-        <br>
-        <strong>Ordered items: </strong> <br>
-
-        <div class="row">
-            <table class="table table-hover">
-                <thead class="thead-light">
-                <tr>
-                    <th>Item ID</th>
-                    <th>Name</th>
-                    <th>Quantity</th>
-                </tr>
-                </thead>
-                {% for item in item_details %}
-                    <tr>
-                        <td>{{ item.item_id }}</td>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.quantity }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-        {% if type != 'process' %}
-        <div style="display: inline-block; float: right;margin-right:calc(0.5vw + 0.5vh);">
-            <form class="form-inline" action="{% url "pdf_download" %}" method="post">{% csrf_token %}
-                        <input type="hidden" name="id" value={{ order.id }}>
-                        <input class="btn btn-secondary nav8_eclipse_btn n8_content_sub_title" type="submit" value="Download Shipping Label">
-                    </form>
-        </div>
-        {% endif %}
     </div>
 
 

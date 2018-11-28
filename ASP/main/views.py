@@ -254,6 +254,24 @@ def loginSession(request):
                 return redirect('/main/login')
 
 def change_password(request):
+    if(request.session['role']=="cm"):
+        currentUser=ClinicManager.objects.get(pk=request.session['id'])
+        page = "main/cm_base.html"
+    elif(request.session['role']=="wp"):
+        currentUser=WarehousePersonnel.objects.get(pk=request.session['id'])
+        page = "main/wp_base.html"
+    elif(request.session['role']=="dp"):
+        currentUser=Dispatcher.objects.get(pk=request.session['id'])
+        page = "main/dp_base.html"
+    if(request.method=='GET'): #return just the homepage
+        firstName= currentUser.firstName
+        lastName = currentUser.lastName
+        username = currentUser.username
+        email = currentUser.email
+        image    = currentUser.image
+        clinicManager = currentUser
+        warehouse = currentUser
+        dispatcher = currentUser
     if(request.method=='GET'): #return just the homepage
         if 'message' in request.session:
             del request.session['message']
@@ -265,9 +283,17 @@ def change_password(request):
             username=Dispatcher.objects.get(pk=request.session['id']).username 
         else:
             username=WarehousePersonnel.objects.get(pk=request.session['id']).username
-        context={
-                'username':username,
-                'role':role,
+         context={
+                'firstName' : firstName,
+                'lastName'  : lastName,
+                'username'  : username,
+                'email'     : email,
+                'image'     : image,
+                'role'      : request.session['role'],
+                'page'      : page,
+                'clinicManager' : clinicManager,
+                'warehouse' : warehouse,
+                'dispatcher' : dispatcher,
                 }
         return render(request, 'main/change_password.html', context)
     else: 

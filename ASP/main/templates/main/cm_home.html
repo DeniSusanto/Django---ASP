@@ -22,7 +22,7 @@
             {%endfor%}
             </select>
         </div>
-        <input class="btn btn-primary mb-2" type="submit" value="Filter">
+        <input class="btn btn-outline-light n8_content_sub_title" type="submit" value="Filter" style="border-radius: 10em; background-color:rgb(49,78,108);">
     </form>
 
     {% comment %} <form action="" method="get" class="form-inline" style="margin-left:calc(1.5vw + 1.5vh);">
@@ -44,7 +44,7 @@
     <div class="card n8_card">
     <img class="card-img-top" src="{{item.image.url}}">
     <div class="card-body n8_card_body">
-        <h5 class="card-title n8_content_sub_title" style="font-size: calc(0.85vw + 0.8vh);"><b>{{item.name}}</b></h5>
+        <h5 class="card-title n8_content_sub_title" style="font-size: calc(0.85vw + 0.8vh); font-family: 'Source Sans Pro', sans-serif;"><b>{{item.name}}</b></h5>
         <p class="card-text n8_content_sub_title" style="font-size: calc(0.75vw + 0.7vh);"> Category: {{item.category.name}} 
         <br>
         Weight: {{item.weight}}
@@ -54,8 +54,8 @@
         <form class="form-inline" action="" method="post">{% csrf_token %}
             <input type="hidden" name="item" value={{item.id}}>
             <input type="number" name="quantity" min='1' max='99' value=1>&ensp;&ensp;
-            <input class="btn btn-outline-success btn-sm" type="submit" value="Add">
-        </form>
+            <input class="btn btn-outline-light n8_content_sub_title" type="submit" value="Add" style="border-radius: 10em; background-color:#295257;">
+    </form>
     </div>
     </div>
 {%endfor%}

@@ -1,57 +1,71 @@
 {%extends "main/cm_base.html"%}
 
 {%block content%}
-<div class="row justify-content-md-center">
-        <div class="col col-lg-9 n8_content_title" style="margin-bottom:calc(0.4vw + 0.2vh)">
-        <b>{{clinicManager.firstName}}'s Cart</b>
-        <span style="position: absolute; right: 5%;font-size: calc(0.9vw + 1.0vh);">Weight: {{weight}} kg </span>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h2>Order Confirmation</h2>
+            </div>
         </div>
     </div>
     <br>
-    <div class="container">
-        <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
-            <thead>
-                <tr class="n8_content_sub_title">
-                    <th scope="col">Item Name</th>
-                    <th scope="col">Weight / item</th>
-                    <th scope="col">Quantity</th>
-                    <th scope="col" >Remove Items</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="container shadow p-3 mb-5 bg-white rounded" >
+        <div class="row">
+            <div class="col">
+                <h4 style="color:rgb(49,78,108)">Item List</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Weight / item</th>
+                        <th>Quantity</th>
+                        <th>Remove Items</th>
+                    </tr>
                     {%for item in itemsInCart%}
                     <tr>
-                        <th scope="col"><!--Insert item name here-->{{item.1}}</th>
-                        <th scope="col"><!--Insert item name here-->{{item.3}}</th>
-                        <th scope="col"><!--Insert quantity here-->{{item.2}}</th>
-                        <th scope="col">
+                        <td><!--Insert item name here-->{{item.1}}</td>
+                        <td><!--Insert item name here-->{{item.3}}</td>
+                        <td><!--Insert quantity here-->{{item.2}}</td>
+                        <td>
                             <form class="form-inline" action="" method="post">{% csrf_token %}
                             <input type="hidden" name="item" value="{{item.0}}">
                             <input type="number" name="quantity" min='0' max='{{item.2}}'>&ensp;
                             <input class="btn btn-outline-danger btn-sm" type="submit" value="Remove">
                             </form>
-                        </th>
+                        </td>
                     </tr>
                     {%endfor%}
-            </tbody>
-        </table>
-
-        <div class="form-group n8_center_block" style="padding-bottom:calc(6.4vw + 6.2vh)">
-            <form action="{%url "submitorder"%}" method='post'>{% csrf_token %}
-                <div class="form-row align-items-center">
-                    <div class="col-auto my-1" style="margin-right: calc(0.7vw + 1vh);">
-                    <label class="mr-sm-2" for="prioritySelection">Priority</label>
-                    <select class="custom-select mr-sm-2" id="prioritySelection" name="priority">
-                        <option value="1" selected>High</option>
-                        <option value="2">Medium</option>
-                        <option value="3">Low</option>
-                    </select>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <form action="{%url "submitorder"%}" method='post'>{% csrf_token %}
+                    <div class="form-row align-items-center">
+                        <div class="col-auto " style="margin-right: calc(0.7vw + 1vh);">
+                        <h5><label class="mr-sm-2" for="prioritySelection" style="color:rgb(223,67,67)">Priority</label></h5>
+                        <select class="custom-select mr-sm-2" id="prioritySelection" name="priority">
+                            <option value="1" selected>High</option>
+                            <option value="2">Medium</option>
+                            <option value="3">Low</option>
+                        </select>
+                        </div>
                     </div>
-                    <div class="col-auto my-1" style="margin-left: calc(0.7vw + 1vh);">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                </div>
-            </form>
+            </div>
+            <div class="col" style="text-align: right">
+                <h5 style="color:rgb(49,78,108)">Total Weight</h5><p style="color:rgb(49,78,108)"> <b>{{weight}} kg</p></b>
+            </div>
         </div>
     </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <button type="submit" class="btn btn-outline-light shadow n8_content_sub_title" style="background-color:rgb(49,78,108);border-radius: 10em;">Submit</button>
+            </div>
+        </div>
+    </div>
+    
 {%endblock%}
