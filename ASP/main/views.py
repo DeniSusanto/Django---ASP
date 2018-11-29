@@ -653,7 +653,7 @@ def wp_home(request):
 
 
 def order_details(request):
-    if not isUserPermitted(request, 'cm'):
+    if not isUserPermitted(request, 'wp'):
         return redirectToHome(request)
     if request.method == 'GET':
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
