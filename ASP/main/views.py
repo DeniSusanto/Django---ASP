@@ -1194,5 +1194,6 @@ def debug(request):
     # f.close()
     # os.remove("shipping.pdf")
     
+    # del request.session['role']
     return HttpResponse("nothing to see here")
     pass
