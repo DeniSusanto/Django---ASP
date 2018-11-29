@@ -1018,7 +1018,7 @@ def confirmReceived(request):
     return redirect('/main/myorders')
 
 def orderRecords(request):
-    allOrder=Order.objects.filter(status=5).order_by('orderDateTime')
+    allOrder=Order.objects.filter(status=5).order_by('-orderDateTime')
     finishedOrders=[]
     for order in allOrder:
         itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
