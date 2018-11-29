@@ -1,24 +1,33 @@
 {% extends page %}
 {% block content %}
 {% load static %}
-    <body>
-        <br>
-        <div class="container d-flex justify-content-center">
-            <div class="jumbotron my-auto"> 
-            <form class="form-inline" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
-                <table class="table" style="margin-bottom:calc(3.4vw + 3.2vh)">
-                    <tr><td colspan='2'><center><h2>Edit Profile</h2></center></td></tr>
-                    <tr><td>First Name:</td><td><input type="text" name="firstName" value={{firstName}}></td></tr>
-                    <tr><td>Last Name:</td><td><input type="text" name="lastName" value={{lastName}}></td></tr>
-                    <tr><td><font color="{{usernameColor}}">Username:</font></td><td><input type="text" name="username" value={{username}}></td></tr>
-                    <tr><td><font color="{{emailColor}}">Email:</font></td><td><input type="email" name="email" value={{email}}></td></tr>
-                    <tr><td>Image:</td><td><input type="file" name="image"></td></tr>
-                    <tr><td colspan='2'><center><input class="btn btn-light" type="submit" value="Update"></center></td></tr>
-                </table>
+<body style="background-image:url(/static/main/background2.jpg); height: 100%; background-position: center; background-repeat: no-repeat; background-size: cover;">   
+        <div class="container d-flex justify-content-left align-middle">
+            <div class="jumbotron" style="background:none;">
+            <form  enctype="multipart/form-data" method='POST'>{% csrf_token %}
+                <h2>Edit Profile</h2><br>
+                <div class="row">
+                    <div class="col">
+                        <label for="firstName">First Name</label>
+                        <input type="text" name="firstName" value="{{firstName}}" class="form-control" placeholder="First Name"><br>   
+                    </div>
+                    <div class="col">
+                        <label for="firstName">Last Name</label>
+                        <input type="text" name="lastName" value="{{lastName}}" class="form-control" placeholder="Last Name"><br>
+                    </div>
+                </div>
+                <label for="firstName">Username</label>
+                <input type="text" name="username" value="{{username}}" class="form-control" placeholder="User Name"><br>
+                <label for="firstName">Email</label>
+                <input type="email" name="email" value="{{email}}" class="form-control" placeholder="Email"><br>
+                <label for="firstName">Change Profile Image</label>
+                <input type="file" name="image" class="form-control" style="height:auto;"><br>
+                <input class="btn btn-outline-success nav8_eclipse_btn  n8_content_sub_title" type="submit" value="Submit" data-toggle="confirmation" data-title="Are you sure?">
             </form>  
-            </div>  
+            </div>
         </div>
         <br>
     </body>
 </html>
 {% endblock %}
+

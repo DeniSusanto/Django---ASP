@@ -36,12 +36,12 @@
   }
   
 .n8_inset img {
-border-radius: inherit;
-width: inherit;
-height: inherit;
-display: block;
-position: relative;
-z-index: 998;
+    border-radius: inherit;
+    width: inherit;
+    height: inherit;
+    display: block;
+    position: relative;
+    z-index: 998;
 }
 
 .n8_vertical_middle{
