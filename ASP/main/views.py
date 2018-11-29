@@ -263,15 +263,14 @@ def change_password(request):
     elif(request.session['role']=="dp"):
         currentUser=Dispatcher.objects.get(pk=request.session['id'])
         page = "main/dp_base.html"
-    if(request.method=='GET'): #return just the homepage
-        firstName= currentUser.firstName
-        lastName = currentUser.lastName
-        username = currentUser.username
-        email = currentUser.email
-        image    = currentUser.image
-        clinicManager = currentUser
-        warehouse = currentUser
-        dispatcher = currentUser
+    firstName= currentUser.firstName
+    lastName = currentUser.lastName
+    username = currentUser.username
+    email = currentUser.email
+    image    = currentUser.image
+    clinicManager = currentUser
+    warehouse = currentUser
+    dispatcher = currentUser
     if(request.method=='GET'): #return just the homepage
         if 'message' in request.session:
             del request.session['message']
@@ -317,8 +316,6 @@ def change_password(request):
                 if role=='cm':
                     messages.error(request,'Password has been updated.')
                     return redirect('/main/cm_home')  
-                    #how to display message in cm_home without using messages.error
-                    #return render(request, "/main/cm_home.html")
                 elif role=='dp':
                     messages.error(request,'Password has been updated.')
                     return redirect('/main/dp_dashboard')  
