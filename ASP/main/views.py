@@ -102,6 +102,9 @@ def registration(request):
     return render(request,'main/registration.html')
             
 def edit_profile(request):
+    if not isUserPermitted(request,'all'):
+        return redirectToHome(request)
+
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
         page = "main/cm_base.html"
@@ -254,6 +257,9 @@ def loginSession(request):
                 return redirect('/main/login')
 
 def change_password(request):
+    if not isUserPermitted(request,'all'):
+        return redirectToHome(request)
+        
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
         page = "main/cm_base.html"
@@ -1215,5 +1221,10 @@ def debug(request):
     # f.close()
     # os.remove("shipping.pdf")
     
+    # del request.session['role']
+    
+    # #token generate
+    # tokenObject= Token(email="ss@gmail.com", role="1")
+    # tokenObject.save()
     return HttpResponse("nothing to see here")
     pass
