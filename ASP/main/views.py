@@ -307,7 +307,22 @@ def change_password(request):
             user=WarehousePersonnel.objects.get(pk=request.session['id'])
         #double entry validation
         if(pw == pw2): 
-            if user.password == pw:
+            if pw=='' or pw2=='':
+                messages.error(request,'Entry cannot be blank. Please try again.')
+                context={
+                'firstName' : firstName,
+                'lastName'  : lastName,
+                'username'  : username,
+                'email'     : email,
+                'image'     : image,
+                'role'      : request.session['role'],
+                'page'      : page,
+                'clinicManager' : clinicManager,
+                'warehouse' : warehouse,
+                'dispatcher' : dispatcher,
+                }
+                return render(request,'main/change_password.html', context)
+            elif user.password == pw:
                 messages.error(request,'Please enter a new password. Current entry already exists in the database.')
                 return redirect('/main/change_password')
             else:
@@ -369,7 +384,13 @@ def reset_password(request):
             user = dis[0]
             role = 'dis'
         if(pw == pw2): 
-            if user.password == pw:
+            if pw=='' or pw2=='':
+                messages.error(request,'Entry cannot be blank. Please try again.')
+                context={
+                'username':username,
+                }
+                return render(request,'main/reset_password.html', context)
+            elif user.password == pw:
                 messages.error(request,'Please enter a new password. Current entry already exists in the database.')
                 context={
                 'username':username,
