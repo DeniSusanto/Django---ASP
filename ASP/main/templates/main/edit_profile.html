@@ -6,16 +6,23 @@
             <div class="jumbotron" style="background:none;">
             <form  enctype="multipart/form-data" method='POST'>{% csrf_token %}
                 <h2>Edit Profile</h2><br>
-                <label for="firstName">First Name</label>
-                <input type="text" name="firstName" value="{{firstName}}" class="form-control" placeholder="First Name"><br>   
-                <label for="firstName">Last Name</label>
-                <input type="text" name="lastName" value="{{lastName}}" class="form-control" placeholder="Last Name"><br>
+                <div class="row">
+                    <div class="col">
+                        <label for="firstName">First Name</label>
+                        <input type="text" name="firstName" value="{{firstName}}" class="form-control" placeholder="First Name"><br>   
+                    </div>
+                    <div class="col">
+                        <label for="firstName">Last Name</label>
+                        <input type="text" name="lastName" value="{{lastName}}" class="form-control" placeholder="Last Name"><br>
+                    </div>
+                </div>
                 <label for="firstName">Username</label>
                 <input type="text" name="username" value="{{username}}" class="form-control" placeholder="User Name"><br>
                 <label for="firstName">Email</label>
                 <input type="email" name="email" value="{{email}}" class="form-control" placeholder="Email"><br>
-                <input type="file" name="image" class="form-control" ><br>
-                <input class="btn btn-outline-light nav8_eclipse_btn  n8_content_sub_title" type="submit" value="Submit">
+                <label for="firstName">Change Profile Image</label>
+                <input type="file" name="image" class="form-control" style="height:auto;"><br>
+                <input class="btn btn-outline-success nav8_eclipse_btn  n8_content_sub_title" type="submit" value="Submit" data-toggle="confirmation" data-title="Are you sure?">
             </form>  
             </div>
         </div>
