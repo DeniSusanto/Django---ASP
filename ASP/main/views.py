@@ -1201,5 +1201,9 @@ def debug(request):
     # os.remove("shipping.pdf")
     
     # del request.session['role']
+    
+    # #token generate
+    # tokenObject= Token(email="ss@gmail.com", role="1")
+    # tokenObject.save()
     return HttpResponse("nothing to see here")
     pass
