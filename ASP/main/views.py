@@ -283,7 +283,7 @@ def change_password(request):
             username=Dispatcher.objects.get(pk=request.session['id']).username 
         else:
             username=WarehousePersonnel.objects.get(pk=request.session['id']).username
-         context={
+            context={
                 'firstName' : firstName,
                 'lastName'  : lastName,
                 'username'  : username,
