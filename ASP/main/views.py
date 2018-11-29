@@ -102,6 +102,9 @@ def registration(request):
     return render(request,'main/registration.html')
             
 def edit_profile(request):
+    if not isUserPermitted(request,'all'):
+        return redirectToHome(request)
+
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
         page = "main/cm_base.html"
@@ -254,6 +257,9 @@ def loginSession(request):
                 return redirect('/main/login')
 
 def change_password(request):
+    if not isUserPermitted(request,'all'):
+        return redirectToHome(request)
+        
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
         page = "main/cm_base.html"
