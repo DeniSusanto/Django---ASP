@@ -128,9 +128,10 @@ def edit_profile(request):
         dispatcher = currentUser
         error=[]
 
+        userCounter = ClinicManager.objects.filter(username=username).count() + WarehousePersonnel.objects.filter(username=username).count() +  Dispatcher.objects.filter(username=username).count()
+        emailCounter = ClinicManager.objects.filter(email=email).count() +  WarehousePersonnel.objects.filter(email=email).count() + Dispatcher.objects.filter(email=email).count() 
+
         if(request.session['role']=="cm"):
-            userCounter = ClinicManager.objects.filter(username=username).count()
-            emailCounter = ClinicManager.objects.filter(email=email).count()
             if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
                 error="Username and Email already exist."
                 usernameColor="red"
@@ -143,8 +144,6 @@ def edit_profile(request):
                     error="Email already exists."
                     emailColor="red"
         elif(request.session['role']=="wp"):
-            userCounter = WarehousePersonnel.objects.filter(username=username).count()
-            emailCounter = WarehousePersonnel.objects.filter(email=email).count()
             if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
                 error="Username and Email already exist."
                 usernameColor="red"
@@ -157,8 +156,6 @@ def edit_profile(request):
                     error="Email already exists."
                     emailColor="red"
         elif(request.session['role']=="dp"):
-            userCounter = Dispatcher.objects.filter(username=username).count()
-            emailCounter = Dispatcher.objects.filter(email=email).count()
             if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
                 error="Username and Email already exist."
                 usernameColor="red"
