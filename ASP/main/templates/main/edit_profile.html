@@ -2,9 +2,9 @@
 {% block content %}
 {% load static %}
 <body style="background-image:url(/static/main/background2.jpg); height: 100%; background-position: center; background-repeat: no-repeat; background-size: cover;">   
-        <div class="container d-flex justify-content-left align-middle">
-            <div class="jumbotron" style="background:none;">
+        <div class="container d-flex justify-content-left align-middle" >
             <form  enctype="multipart/form-data" method='POST'>{% csrf_token %}
+                <br>
                 <h2>Edit Profile</h2><br>
                 <div class="row">
                     <div class="col">
@@ -24,7 +24,6 @@
                 <input type="file" name="image" class="form-control" style="height:auto;"><br>
                 <input class="btn btn-outline-light shadow n8_content_sub_title" type="submit" value="Submit" data-toggle="confirmation" data-title="Are you sure?" style="background-color:#314E6C; border-radius: 10em;">
             </form>  
-            </div>
         </div>
         <br>
     </body>
