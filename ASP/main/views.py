@@ -624,7 +624,7 @@ def cm_cart(request):
             if(itemObj.weight*quantity+cartObj.getWeight() <= maxOrderWeight):
                 itemInCart.quantity = quantity
                 itemInCart.save()
-                message=itemObj.name + "quantity has been changed to " + str(quantity) 
+                message=itemObj.name + " quantity has been changed to " + str(quantity)
                 request.session['success'] = message
             else:
                 message= "Order weight limit is reached"
