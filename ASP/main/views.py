@@ -616,12 +616,13 @@ def cm_cart(request):
         quantity=int(request.POST.get('quantity'))
         clinicMan=ClinicManager.objects.get(pk=request.session['id'])
         cartObj=Cart.objects.get(clinicID=clinicMan)
+        quantityInCart=ItemsInCart.objects.get(cartID=cartObj, itemID=itemObj).quantity
 
         itemInCart=ItemsInCart.objects.get(cartID=cartObj, itemID=itemObj)
         if quantity == 0:
             itemInCart.delete()
         else:
-            if(itemObj.weight*quantity+cartObj.getWeight() <= maxOrderWeight):
+            if not (itemObj.weight * (quantity - quantityInCart) + cartObj.getWeight() > maxOrderWeight):
                 itemInCart.quantity = quantity
                 itemInCart.save()
                 message=itemObj.name + "quantity has been changed to " + str(quantity) 
