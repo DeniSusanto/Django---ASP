@@ -195,10 +195,13 @@ def edit_profile(request):
             currentUser.image=image
             currentUser.save()
             if(request.session['role']=="cm"):
+                messages.error(request,'Data has been updated.')
                 return redirect('/main/cm_home')
             elif(request.session['role']=="wp"):
+                messages.error(request,'Data has been updated.')
                 return redirect('/main/wp_home')
             elif(request.session['role']=="dp"):
+                messages.error(request,'Data has been updated.')
                 return redirect('/main/dp_dashboard')
     else:
         firstName= currentUser.firstName
@@ -357,29 +360,36 @@ def forget_password(request):
         dis=Dispatcher.objects.filter(email=email)
         if (cm.count() > 0): #email exists in the database
             username = cm[0].username
+            r=1
         elif (wp.count() > 0):
             username = wp[0].username
+            r=2
         elif (dis.count() > 0):    
             username = dis[0].username
+            r=3
         else: #email does not exist in the database
             messages.error(request, "Email entered does not exist in the database. Please try again.")    
             return redirect('/main/forget_password')
         e = []
         e.append(email)
-        content = "Dear " + username + ", \n Click on the link below to reset your password: http://127.0.0.1:8000/main/reset_password?username=" + username + "\n"
+        dummy= Token(email=email, role=r)
+        dummy.save()
+        content = "Dear " + username + ", \n Click on the link below to reset your password: http://127.0.0.1:8000/main/reset_password?token=" + str(dummy.token) + "\n"
         send_mail('Reset Password',content,'navig8.comp3297@gmail.com',e,fail_silently=False,)
         messages.error(request, 'A link to reset your password has been sent to your email.')
         return redirect('/main/login')
 
 def reset_password(request):
-    username=request.GET.get('username')
-    if(request.method=='POST'): #process the password reset request
-        username=request.POST.get('username')
+    token=request.GET.get('token')
+    if(request.method=='POST'): #process the password reset request    
+        token=request.POST.get('token')
         pw=request.POST.get('password')
         pw2=request.POST.get('password2')
-        cm=ClinicManager.objects.filter(username=username)
-        wp=WarehousePersonnel.objects.filter(username=username)
-        dis=Dispatcher.objects.filter(username=username)
+        tokenObject = Token.objects.filter(token=token)
+        e = tokenObject[0].email
+        cm=ClinicManager.objects.filter(email=e)
+        wp=WarehousePersonnel.objects.filter(email=e)
+        dis=Dispatcher.objects.filter(email=e)
         if cm.count() > 0: 
             user = cm[0]
             role = 'cm'
@@ -393,29 +403,49 @@ def reset_password(request):
             if pw=='' or pw2=='':
                 messages.error(request,'Entry cannot be blank. Please try again.')
                 context={
-                'username':username,
+                'token':token,
+                'username':user.username,
                 }
                 return render(request,'main/reset_password.html', context)
             elif user.password == pw:
                 messages.error(request,'Please enter a new password. Current entry already exists in the database.')
                 context={
-                'username':username,
+                'token':token,
+                'username':user.username,
                 }
                 return render(request,'main/reset_password.html', context)
             else:
                 user.password = pw
                 user.save()
                 messages.error(request,'Password has been updated.')
+                Token.objects.filter(token=token).delete()
                 return redirect('/main/login')
         else:
             messages.error(request,'The passwords entered do not match. Please try again.')
             context={
-                'username':username,
+                'token':token,
+                'username':user.username,
                 }
             return render(request,'main/reset_password.html', context)
     else:
+        token=request.GET.get('token')
+        tokenObject = Token.objects.filter(token=token)
+        e = tokenObject[0].email
+        cm=ClinicManager.objects.filter(email=e)
+        wp=WarehousePersonnel.objects.filter(email=e)
+        dis=Dispatcher.objects.filter(email=e)
+        if cm.count() > 0: 
+            user = cm[0]
+            role = 'cm'
+        elif wp.count() > 0: 
+            user = wp[0]
+            role = 'wp'
+        else: 
+            user = dis[0]
+            role = 'dis'
         context={
-                'username':username,
+                'token':token,
+                'username': user.username,
                 }
         return render(request,'main/reset_password.html', context)
 
