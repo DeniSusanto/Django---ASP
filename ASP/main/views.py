@@ -102,6 +102,9 @@ def registration(request):
     return render(request,'main/registration.html')
             
 def edit_profile(request):
+    if not isUserPermitted(request,'all'):
+        return redirectToHome(request)
+
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
         page = "main/cm_base.html"
@@ -192,10 +195,13 @@ def edit_profile(request):
             currentUser.image=image
             currentUser.save()
             if(request.session['role']=="cm"):
+                messages.error(request,'Data has been updated.')
                 return redirect('/main/cm_home')
             elif(request.session['role']=="wp"):
+                messages.error(request,'Data has been updated.')
                 return redirect('/main/wp_home')
             elif(request.session['role']=="dp"):
+                messages.error(request,'Data has been updated.')
                 return redirect('/main/dp_dashboard')
     else:
         firstName= currentUser.firstName
@@ -254,6 +260,9 @@ def loginSession(request):
                 return redirect('/main/login')
 
 def change_password(request):
+    if not isUserPermitted(request,'all'):
+        return redirectToHome(request)
+        
     if(request.session['role']=="cm"):
         currentUser=ClinicManager.objects.get(pk=request.session['id'])
         page = "main/cm_base.html"
@@ -263,15 +272,14 @@ def change_password(request):
     elif(request.session['role']=="dp"):
         currentUser=Dispatcher.objects.get(pk=request.session['id'])
         page = "main/dp_base.html"
-    if(request.method=='GET'): #return just the homepage
-        firstName= currentUser.firstName
-        lastName = currentUser.lastName
-        username = currentUser.username
-        email = currentUser.email
-        image    = currentUser.image
-        clinicManager = currentUser
-        warehouse = currentUser
-        dispatcher = currentUser
+    firstName= currentUser.firstName
+    lastName = currentUser.lastName
+    username = currentUser.username
+    email = currentUser.email
+    image    = currentUser.image
+    clinicManager = currentUser
+    warehouse = currentUser
+    dispatcher = currentUser
     if(request.method=='GET'): #return just the homepage
         if 'message' in request.session:
             del request.session['message']
@@ -283,7 +291,7 @@ def change_password(request):
             username=Dispatcher.objects.get(pk=request.session['id']).username 
         else:
             username=WarehousePersonnel.objects.get(pk=request.session['id']).username
-         context={
+        context={
                 'firstName' : firstName,
                 'lastName'  : lastName,
                 'username'  : username,
@@ -308,22 +316,35 @@ def change_password(request):
             user=WarehousePersonnel.objects.get(pk=request.session['id'])
         #double entry validation
         if(pw == pw2): 
-            if user.password == pw:
+            if pw=='' or pw2=='':
+                messages.error(request,'Entry cannot be blank. Please try again.')
+                context={
+                'firstName' : firstName,
+                'lastName'  : lastName,
+                'username'  : username,
+                'email'     : email,
+                'image'     : image,
+                'role'      : request.session['role'],
+                'page'      : page,
+                'clinicManager' : clinicManager,
+                'warehouse' : warehouse,
+                'dispatcher' : dispatcher,
+                }
+                return render(request,'main/change_password.html', context)
+            elif user.password == pw:
                 messages.error(request,'Please enter a new password. Current entry already exists in the database.')
                 return redirect('/main/change_password')
             else:
                 user.password = pw
                 user.save()
                 if role=='cm':
-                    messages.error(request,'Password has been updated.')
+                    messages.success(request,'Password has been updated.')
                     return redirect('/main/cm_home')  
-                    #how to display message in cm_home without using messages.error
-                    #return render(request, "/main/cm_home.html")
                 elif role=='dp':
-                    messages.error(request,'Password has been updated.')
+                    messages.success(request,'Password has been updated.')
                     return redirect('/main/dp_dashboard')  
                 else:
-                    messages.error(request,'Password has been updated.')
+                    messages.success(request,'Password has been updated.')
                     return redirect("/main/wp_home")  
         else:
             messages.error(request,'The passwords entered do not match. Please try again.')
@@ -339,29 +360,36 @@ def forget_password(request):
         dis=Dispatcher.objects.filter(email=email)
         if (cm.count() > 0): #email exists in the database
             username = cm[0].username
+            r=1
         elif (wp.count() > 0):
             username = wp[0].username
+            r=2
         elif (dis.count() > 0):    
             username = dis[0].username
+            r=3
         else: #email does not exist in the database
             messages.error(request, "Email entered does not exist in the database. Please try again.")    
             return redirect('/main/forget_password')
         e = []
         e.append(email)
-        content = "Dear " + username + ", \n Click on the link below to reset your password: http://127.0.0.1:8000/main/reset_password?username=" + username + "\n"
+        dummy= Token(email=email, role=r)
+        dummy.save()
+        content = "Dear " + username + ", \n Click on the link below to reset your password: http://127.0.0.1:8000/main/reset_password?token=" + str(dummy.token) + "\n"
         send_mail('Reset Password',content,'navig8.comp3297@gmail.com',e,fail_silently=False,)
-        messages.error(request, 'A link to reset your password has been sent to your email.')
+        messages.success(request, 'A link to reset your password has been sent to your email.')
         return redirect('/main/login')
 
 def reset_password(request):
-    username=request.GET.get('username')
-    if(request.method=='POST'): #process the password reset request
-        username=request.POST.get('username')
+    token=request.GET.get('token')
+    if(request.method=='POST'): #process the password reset request    
+        token=request.POST.get('token')
         pw=request.POST.get('password')
         pw2=request.POST.get('password2')
-        cm=ClinicManager.objects.filter(username=username)
-        wp=WarehousePersonnel.objects.filter(username=username)
-        dis=Dispatcher.objects.filter(username=username)
+        tokenObject = Token.objects.filter(token=token)
+        e = tokenObject[0].email
+        cm=ClinicManager.objects.filter(email=e)
+        wp=WarehousePersonnel.objects.filter(email=e)
+        dis=Dispatcher.objects.filter(email=e)
         if cm.count() > 0: 
             user = cm[0]
             role = 'cm'
@@ -372,26 +400,52 @@ def reset_password(request):
             user = dis[0]
             role = 'dis'
         if(pw == pw2): 
-            if user.password == pw:
+            if pw=='' or pw2=='':
+                messages.error(request,'Entry cannot be blank. Please try again.')
+                context={
+                'token':token,
+                'username':user.username,
+                }
+                return render(request,'main/reset_password.html', context)
+            elif user.password == pw:
                 messages.error(request,'Please enter a new password. Current entry already exists in the database.')
                 context={
-                'username':username,
+                'token':token,
+                'username':user.username,
                 }
                 return render(request,'main/reset_password.html', context)
             else:
                 user.password = pw
                 user.save()
-                messages.error(request,'Password has been updated.')
+                messages.success(request,'Password has been updated.')
+                Token.objects.filter(token=token).delete()
                 return redirect('/main/login')
         else:
             messages.error(request,'The passwords entered do not match. Please try again.')
             context={
-                'username':username,
+                'token':token,
+                'username':user.username,
                 }
             return render(request,'main/reset_password.html', context)
     else:
+        token=request.GET.get('token')
+        tokenObject = Token.objects.filter(token=token)
+        e = tokenObject[0].email
+        cm=ClinicManager.objects.filter(email=e)
+        wp=WarehousePersonnel.objects.filter(email=e)
+        dis=Dispatcher.objects.filter(email=e)
+        if cm.count() > 0: 
+            user = cm[0]
+            role = 'cm'
+        elif wp.count() > 0: 
+            user = wp[0]
+            role = 'wp'
+        else: 
+            user = dis[0]
+            role = 'dis'
         context={
-                'username':username,
+                'token':token,
+                'username': user.username,
                 }
         return render(request,'main/reset_password.html', context)
 
@@ -653,15 +707,15 @@ def wp_home(request):
 
 
 def order_details(request):
-    if not isUserPermitted(request, 'cm'):
+    if not isUserPermitted(request, 'wp'):
         return redirectToHome(request)
     if request.method == 'GET':
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
         order_id = request.GET.get('id')
         order_type = request.GET.get('type')
-        # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
+        clinic = clinic_manager.locationID
         items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
@@ -685,7 +739,101 @@ def order_details(request):
             'cm': clinic_manager,
             'item_details': item_details_list,
         }
+
+        if order_type == "dispatch":
+            buffer = BytesIO()
+            c = canvas.Canvas(buffer, pagesize=portrait(letter))
+            c.setTitle("order" + str(order_id))
+            # Borders
+            c.line(60, 720, 550, 720)
+            c.line(60, 720, 60, 50)
+            c.line(60, 50, 550, 50)
+            c.line(550, 720, 550, 50)
+
+            directory = os.path.dirname(__file__)
+            logo = os.path.join(directory, 'media/qm_logo.jpg')
+            c.drawImage(logo, 80, 610, width=120, height=100)
+
+            c.line(60, 595, 550, 595)  # Horizontal line
+            c.line(220, 595, 220, 720)  # Vertical line
+            c.setFont('Helvetica', 12, leading=None)
+            print_time = str(datetime.date.today())
+            c.drawRightString(540, 700, "Order #" + str(order_id))
+            c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
+            c.drawString(230, 685, "Processed on: " + print_time)
+            c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
+            c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
+            c.drawString(307, 640, "(22.270257, 114.131376, 161)")
+            c.line(220, 630, 550, 630)
+
+            c.setFont('Helvetica', 23, leading=None)
+            if order.priority == 1:
+                package_title = "ASP HIGH-PRIORITY PKG"
+            elif order.priority == 2:
+                package_title = "ASP MEDIUM-PRIORITY PKG"
+            else:
+                package_title = "ASP LOW-PRIORITY PKG"
+
+            c.drawCentredString(385, 605, package_title)
+
+            c.setFont('Helvetica', 15, leading=None)
+            c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
+            c.drawString(138, 555, clinic.name)
+            c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
+
+            c.line(60, 525, 550, 525)
+
+            styles = getSampleStyleSheet()
+            styles['Normal'].fontName = 'Times-Bold'
+            styles['Normal'].fontSize = 12
+            style = ParagraphStyle(
+                name='Body',
+                fontName='Times-Roman',
+                fontSize=12,
+            )
+
+            width, height = letter
+            data = [[Paragraph("ID", styles['Normal']),
+                     Paragraph("Name", styles['Normal']),
+                     Paragraph("Quantity", styles['Normal'])],
+                    ]
+
+            for item in item_details_list:
+                item_data = [Paragraph(str(item.item_id), style), Paragraph(item.name, style),
+                             Paragraph(str(item.quantity), style)]
+                data.append(item_data)
+
+            table = Table(data, colWidths=[30, 350, 70])
+
+            table.setStyle(TableStyle(
+                [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                 ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+                 ('VALIGN', (0, 0), (-1, 0), 'TOP'),
+                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                 ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
+
+            table.wrapOn(c, width, height)
+            table.wrapOn(c, width, height)
+            table.drawOn(c, 80, 300)
+
+            c.showPage()
+            c.save()
+
+            pdf = buffer.getvalue()
+            buffer.close()
+
+            f = open("shipping.pdf", "wb")
+            f.write(pdf)
+            f.close()
+            f = open("shipping.pdf", "r")
+            django_file = File(f)
+            order.file = django_file
+            order.save()
+            f.close()
+            os.remove("shipping.pdf")
+
         return render(request, 'main/order_details.html', context)
+
     else:
         request.session['error'] = "Oh no!"
         request.session['message'] = "Failed to view order"
@@ -698,120 +846,15 @@ def pdf_download(request):
     if request.method == 'POST':
         order_id = request.POST.get('id')
         order = Order.objects.get(pk=order_id)
-        clinic_manager = Order.objects.get(pk=order_id).clinicID
-        clinic = clinic_manager.locationID
-        items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
 
-        class ItemDetails:
-            def __init__(self, item_id, name, quantity):
-                self.item_id = item_id
-                self.name = name
-                self.quantity = quantity
-
-        item_details_list = []
-
-        for item in items_list:
-            temp = Order.objects.filter(pk=order_id)
-            item_name = ItemCatalogue.objects.get(pk=item).get_name()
-            item_quantity = temp[0].getItemQuantity(item)
-            item_details_list.append(ItemDetails(item, item_name, item_quantity))
-
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
-
-        buffer = BytesIO()
-        c = canvas.Canvas(buffer, pagesize=portrait(letter))
-        c.setTitle("order"+str(order_id))
-        # Borders
-        c.line(60, 720, 550, 720)
-        c.line(60, 720, 60, 50)
-        c.line(60, 50, 550, 50)
-        c.line(550, 720, 550, 50)
-
+        pdf_name = order.file.name.split('/')[-1]
         directory = os.path.dirname(__file__)
-        logo = os.path.join(directory, 'media/qm_logo.jpg')
-      # c.drawImage(logo, 80, 610, width=120, height=100)
+        path = os.path.join(directory, 'media/orderLabel/' + pdf_name)
 
-        c.line(60, 595, 550, 595)  # Horizontal line
-        c.line(220, 595, 220, 720)  # Vertical line
-        c.setFont('Helvetica', 12, leading=None)
-        print_time = str(datetime.date.today())
-        c.drawRightString(540, 700, "Order #"+str(order_id))
-        c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
-        c.drawString(230, 685, "Processed on: " + print_time)
-        c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
-        c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
-        c.drawString(307, 640, "(22.269660, 114.131303, 163)")
-        c.line(220, 630, 550, 630)
-
-        c.setFont('Helvetica', 23, leading=None)
-        if order.priority == 1:
-            package_title = "ASP HIGH-PRIORITY PKG"
-        elif order.priority == 2:
-            package_title = "ASP MEDIUM-PRIORITY PKG"
-        else:
-            package_title = "ASP LOW-PRIORITY PKG"
-
-        c.drawCentredString(385, 605, package_title)
-
-        c.setFont('Helvetica', 15, leading=None)
-        c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
-        c.drawString(138, 555, clinic.name)
-        c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
-
-        c.line(60, 525, 550, 525)
-
-        styles = getSampleStyleSheet()
-        styles['Normal'].fontName = 'Times-Bold'
-        styles['Normal'].fontSize = 12
-        style = ParagraphStyle(
-            name='Body',
-            fontName='Times-Roman',
-            fontSize=12,
-        )
-
-        width, height = letter
-        data = [[Paragraph("ID", styles['Normal']),
-                 Paragraph("Name", styles['Normal']),
-                 Paragraph("Quantity", styles['Normal'])],
-                ]
-
-        for item in item_details_list:
-            item_data = [Paragraph(str(item.item_id), style), Paragraph(item.name, style), Paragraph(str(item.quantity), style)]
-            data.append(item_data)
-
-
-        table = Table(data, colWidths=[30, 350, 70])
-
-        table.setStyle(TableStyle(
-            [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-             ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
-             ('VALIGN', (0, 0), (-1, 0), 'TOP'),
-             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
-
-        table.wrapOn(c, width, height)
-        table.wrapOn(c, width, height)
-        table.drawOn(c, 80, 300)
-
-        c.showPage()
-        c.save()
-
-        pdf = buffer.getvalue()
-        buffer.close()
-        response.write(pdf)
-
-        f = open("shipping.pdf", "wb")
-        f.write(pdf)
-        f2 = open("shipping.pdf", "r")
-        django_file = File(f2)
-        order.file = django_file
-        order.save()
-        f.close()
-        f2.close()
-        os.remove("shipping.pdf")
-
-        return response
+        with open(path, 'r') as pdf:
+            response = HttpResponse(pdf.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename=ShippingLabel.pdf'
+            return response
 
     else:
         request.session['error'] = "Oh no!"
@@ -905,15 +948,14 @@ def dp_close_session(request):
     orderQueue=Order.objects.filter(status=statusToInt("Queued for Dispatch")).order_by('priority', 'orderDateTime')
     tupleOrder = dp_nextOrders(orderQueue)
     ordersToBeProcessed=tupleOrder[0]
-    #send email confirmation to clinic managers
-    #sendDispatchedEmail(ordersToBeProcessed)
     #log orders, save it to OrderRecord
     for order in ordersToBeProcessed:
         orderRecord=OrderRecord(orderID=order, dispatchedDateTime=datetime.datetime.now(), deliveredDateTime=None)
         order.status=statusToInt("Dispatched")
         order.save()
         orderRecord.save()
-
+    #send email confirmation to clinic managers
+    sendDispatchedEmail(ordersToBeProcessed)
     return redirect('/main/dp_dashboard')
 
 def logout(request):
@@ -995,7 +1037,7 @@ def confirmReceived(request):
     return redirect('/main/myorders')
 
 def orderRecords(request):
-    allOrder=Order.objects.filter(status=5).order_by('orderDateTime')
+    allOrder=Order.objects.filter(status=5).order_by('-orderDateTime')
     finishedOrders=[]
     for order in allOrder:
         itemsObj=ItemsInOrder.objects.filter(orderID=order).values('itemID').distinct()
@@ -1105,5 +1147,103 @@ def debug(request):
     #     del request.session[key]
     # return redirect('/main/login')
     #return HttpResponse(datetime.datetime.now())
+    # #save file pdf
+    # clinic_manager=ClinicManager.objects.get(username="sarah")
+    # clinic=clinic_manager.locationID
+    # order=Order.objects.get(pk=79)
+    # order_id= order.id
+    # buffer = BytesIO()
+    # c = canvas.Canvas(buffer, pagesize=portrait(letter))
+    # c.setTitle("order"+str(order_id))
+    # # Borders
+    # c.line(60, 720, 550, 720)
+    # c.line(60, 720, 60, 50)
+    # c.line(60, 50, 550, 50)
+    # c.line(550, 720, 550, 50)
+
+    # directory = os.path.dirname(__file__)
+    # logo = os.path.join(directory, 'media/qm_logo.jpg')
+    # # c.drawImage(logo, 80, 610, width=120, height=100)
+
+    # c.line(60, 595, 550, 595)  # Horizontal line
+    # c.line(220, 595, 220, 720)  # Vertical line
+    # c.setFont('Helvetica', 12, leading=None)
+    # print_time = str(datetime.date.today())
+    # c.drawRightString(540, 700, "Order #"+str(order_id))
+    # c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
+    # c.drawString(230, 685, "Processed on: " + print_time)
+    # c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
+    # c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
+    # c.drawString(307, 640, "(22.269660, 114.131303, 163)")
+    # c.line(220, 630, 550, 630)
+
+    # c.setFont('Helvetica', 23, leading=None)
+    # if order.priority == 1:
+    #     package_title = "ASP HIGH-PRIORITY PKG"
+    # elif order.priority == 2:
+    #     package_title = "ASP MEDIUM-PRIORITY PKG"
+    # else:
+    #     package_title = "ASP LOW-PRIORITY PKG"
+
+    # c.drawCentredString(385, 605, package_title)
+
+    # c.setFont('Helvetica', 15, leading=None)
+    # c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
+    # c.drawString(138, 555, clinic.name)
+    # c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
+
+    # c.line(60, 525, 550, 525)
+
+    # styles = getSampleStyleSheet()
+    # styles['Normal'].fontName = 'Times-Bold'
+    # styles['Normal'].fontSize = 12
+    # style = ParagraphStyle(
+    #     name='Body',
+    #     fontName='Times-Roman',
+    #     fontSize=12,
+    # )
+
+    # width, height = letter
+    # data = [[Paragraph("ID", styles['Normal']),
+    #             Paragraph("Name", styles['Normal']),
+    #             Paragraph("Quantity", styles['Normal'])],
+    #         ]
+
+
+
+    # table = Table(data, colWidths=[30, 350, 70])
+
+    # table.setStyle(TableStyle(
+    #     [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+    #         ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+    #         ('VALIGN', (0, 0), (-1, 0), 'TOP'),
+    #         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    #         ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
+
+    # table.wrapOn(c, width, height)
+    # table.wrapOn(c, width, height)
+    # table.drawOn(c, 80, 300)
+
+    # c.showPage()
+    # c.save()
+
+    # pdf = buffer.getvalue()
+    # buffer.close()
+
+    # f = open("shipping.pdf", "wb")
+    # f.write(pdf)
+    # f.close()
+    # f = open("shipping.pdf", "r")
+    # django_file = File(f)
+    # order.file = django_file
+    # order.save()
+    # f.close()
+    # os.remove("shipping.pdf")
+    
+    # del request.session['role']
+    
+    # #token generate
+    # tokenObject= Token(email="ss@gmail.com", role="1")
+    # tokenObject.save()
     return HttpResponse("nothing to see here")
     pass

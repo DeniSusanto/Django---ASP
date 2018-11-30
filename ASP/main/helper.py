@@ -177,9 +177,10 @@ def redirectToHome(request):
 
 def isUserPermitted(request, targetRole):
     if 'role' in request.session:
+        if targetRole == "all":
+            return True
         userRole=request.session['role']
         if userRole != targetRole:
-            request.session['error']="You don't have persmission to access the page!"
             return False
         else:
             return True

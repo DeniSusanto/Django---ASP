@@ -40,9 +40,15 @@
         <div class="container d-flex justify-content-left align-middle">
             <div class="jumbotron" style="background:none;">
             <form  enctype="multipart/form-data" method='POST'>{% csrf_token %}
-                <h2>Sign Up</h2>
-                <input type="text" name="firstName" value="{{firstName}}" class="form-control" placeholder="First Name"><br>   
-                <input type="text" name="lastName" value="{{lastName}}" class="form-control" placeholder="Last Name"><br>
+                <h2>Sign Up</h2> <br>
+                <div class="row">
+                    <div class="col">
+                    <input type="text" name="firstName" value="{{firstName}}" class="form-control" placeholder="First Name"><br>
+                    </div>
+                    <div class="col">
+                    <input type="text" name="lastName" value="{{lastName}}" class="form-control" placeholder="Last Name"><br>
+                    </div>
+                </div>
                 <input type="text" name="username" value="{{username}}" class="form-control" placeholder="User Name"><br>
                 <input type="password" name="password" value="{{password}}" class="form-control" placeholder="Password"><br>
                 <input type="file" name="image" class="form-control" ><br>
@@ -50,13 +56,15 @@
                 Clinic Location:
                         <select name="location">
                             {%for location in allLocations%}
+                                {% if location.name != 'Queen Mary Hospital Drone Port' %}
                                 <option value={{location.id}}
                                 {% if cat.id == filter %} selected {%endif%}
                                 >{{location.name}}</option>
+                                {% endif %}
                             {%endfor%}
                         </select>
                 {%endif%}<br><br>
-                <input class="btn btn-outline-light nav8_eclipse_btn  n8_content_sub_title" type="submit" value="Register">
+                <input class="btn btn-outline-success nav8_eclipse_btn  n8_content_sub_title" type="submit" value="Register">
             </form>  
             </div>
         </div>
