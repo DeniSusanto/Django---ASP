@@ -4,7 +4,11 @@
 {%block content%}
 
 {% for message in messages %}
-<div class="alert alert-dismissible">
+{% if message.tags == 'error' %}
+    <div class="container alert alert-danger alert-dismissible fade show"> 
+{% else %}
+    <div class="container alert alert-success alert-dismissible fade show"> 
+{% endif %}
     <a class="close" href="/main/cm_home" data-dismiss="alert" aria-label="Close">×</a>
     <center>{{ message }}</center>
 </div>

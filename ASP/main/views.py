@@ -335,13 +335,13 @@ def change_password(request):
                 user.password = pw
                 user.save()
                 if role=='cm':
-                    messages.error(request,'Password has been updated.')
+                    messages.success(request,'Password has been updated.')
                     return redirect('/main/cm_home')  
                 elif role=='dp':
-                    messages.error(request,'Password has been updated.')
+                    messages.success(request,'Password has been updated.')
                     return redirect('/main/dp_dashboard')  
                 else:
-                    messages.error(request,'Password has been updated.')
+                    messages.success(request,'Password has been updated.')
                     return redirect("/main/wp_home")  
         else:
             messages.error(request,'The passwords entered do not match. Please try again.')
@@ -368,7 +368,7 @@ def forget_password(request):
         e.append(email)
         content = "Dear " + username + ", \n Click on the link below to reset your password: http://127.0.0.1:8000/main/reset_password?username=" + username + "\n"
         send_mail('Reset Password',content,'navig8.comp3297@gmail.com',e,fail_silently=False,)
-        messages.error(request, 'A link to reset your password has been sent to your email.')
+        messages.success(request, 'A link to reset your password has been sent to your email.')
         return redirect('/main/login')
 
 def reset_password(request):
@@ -405,7 +405,7 @@ def reset_password(request):
             else:
                 user.password = pw
                 user.save()
-                messages.error(request,'Password has been updated.')
+                messages.success(request,'Password has been updated.')
                 return redirect('/main/login')
         else:
             messages.error(request,'The passwords entered do not match. Please try again.')
