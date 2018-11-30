@@ -22,18 +22,16 @@
                         <th>Item Name</th>
                         <th>Weight / item</th>
                         <th>Quantity</th>
-                        <th>Remove Items</th>
                     </tr>
                     {%for item in itemsInCart%}
                     <tr>
                         <td><!--Insert item name here-->{{item.1}}</td>
                         <td><!--Insert item name here-->{{item.3}}</td>
-                        <td><!--Insert quantity here-->{{item.2}}</td>
                         <td>
                             <form class="form-inline" action="" method="post">{% csrf_token %}
                             <input type="hidden" name="item" value="{{item.0}}">
-                            <input type="number" name="quantity" min='0' max='{{item.2}}'>&ensp;
-                            <input class="btn btn-outline-danger btn-sm" type="submit" value="Remove">
+                            <input type="number" name="quantity" min='0' max='99' value={{item.2}}>&ensp;
+                            <input class="btn btn-outline-danger btn-sm" type="submit" value="Edit">
                             </form>
                         </td>
                     </tr>

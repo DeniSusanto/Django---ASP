@@ -592,23 +592,25 @@ def cm_cart(request):
         # for item in itemsCartList:
         #     itemPkList.append(item.itemID.id)
         # itemList=ItemCatalogue.objects.filter(id__in=itemPkList)
+        context={
+                'itemsInCart':itemsInCart,
+                'clinicManager':clinicMan,
+                'weight':cartWeight,
+                }
         if 'success' in request.session:
-            message=request.session['success']
+            success=request.session['success']
             del request.session['success']
-            context={
-                    'success': message,
-                    'itemsInCart':itemsInCart,
-                    'clinicManager':clinicMan,
-                    'weight':cartWeight,
-                    }
-        else:
-            context={
-                    'itemsInCart':itemsInCart,
-                    'clinicManager':clinicMan,
-                    'weight':cartWeight,
-            }
+            context['success']=success
+        if 'error' in request.session:
+            error=request.session['error']
+            del request.session['error']
+            context['error']=error
+        if 'message' in request.session:
+            message=request.session['message']
+            del request.session['message']
+            context['message']=message
         return render(request, 'main/cm_cart.html', context)
-    else:#delete item from cart request
+    else:#edit item from cart request
         item=request.POST.get('item')
         itemObj=ItemCatalogue.objects.get(pk=item)
         quantity=int(request.POST.get('quantity'))
@@ -616,16 +618,21 @@ def cm_cart(request):
         cartObj=Cart.objects.get(clinicID=clinicMan)
 
         itemInCart=ItemsInCart.objects.get(cartID=cartObj, itemID=itemObj)
-        if (itemInCart.quantity - quantity) == 0:
+        if quantity == 0:
             itemInCart.delete()
         else:
-            itemInCart.quantity=itemInCart.quantity - quantity
-            itemInCart.save()
+            if(itemObj.weight*quantity+cartObj.getWeight() <= maxOrderWeight):
+                itemInCart.quantity = quantity
+                itemInCart.save()
+                message=itemObj.name + "quantity has been changed to " + str(quantity) 
+                request.session['success'] = message
+            else:
+                message= "Order weight limit is reached"
+                request.session['error'] = message
+
 
         # for i in range(int(quantity)):
         #     itemInCart[i].delete()
-        message=str(quantity) + " " + itemObj.name + " have been removed"
-        request.session['success']=message
         return redirect('/main/cm_cart')
 
 
@@ -643,7 +650,6 @@ def submitorder(request):
         request.session['success']="Order has been submitted!"
         return redirect('/main/myorders')
     else:
-       
         request.session['error']="Oh no!"
         request.session['message']="Failed to submit order"
         return redirect('/main/cm_home')
