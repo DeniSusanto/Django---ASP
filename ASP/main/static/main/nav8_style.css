@@ -111,3 +111,21 @@
     border-radius: 10em;
     background-color:rgb(49,78,108);
 }
+
+input[type=submit] {
+    padding-left:20px; 
+    padding-right:20px;
+}
+
+button[type=submit] {
+    padding-left:20px; 
+    padding-right:20px;
+}
+
+input[type=submit]:hover {
+    color: 	#DCDCDC;
+}
+
+button[type=submit]:hover {
+    color: 	#DCDCDC;
+}
