@@ -713,9 +713,9 @@ def order_details(request):
         warehouse = WarehousePersonnel.objects.get(pk=request.session['id'])
         order_id = request.GET.get('id')
         order_type = request.GET.get('type')
-        # order_id = int(order_id[:-1])
         order = Order.objects.get(pk=order_id)
         clinic_manager = Order.objects.get(pk=order_id).clinicID
+        clinic = clinic_manager.locationID
         items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
 
         class ItemDetails:
@@ -739,7 +739,101 @@ def order_details(request):
             'cm': clinic_manager,
             'item_details': item_details_list,
         }
+
+        if order_type == "dispatch":
+            buffer = BytesIO()
+            c = canvas.Canvas(buffer, pagesize=portrait(letter))
+            c.setTitle("order" + str(order_id))
+            # Borders
+            c.line(60, 720, 550, 720)
+            c.line(60, 720, 60, 50)
+            c.line(60, 50, 550, 50)
+            c.line(550, 720, 550, 50)
+
+            directory = os.path.dirname(__file__)
+            logo = os.path.join(directory, 'media/qm_logo.jpg')
+            c.drawImage(logo, 80, 610, width=120, height=100)
+
+            c.line(60, 595, 550, 595)  # Horizontal line
+            c.line(220, 595, 220, 720)  # Vertical line
+            c.setFont('Helvetica', 12, leading=None)
+            print_time = str(datetime.date.today())
+            c.drawRightString(540, 700, "Order #" + str(order_id))
+            c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
+            c.drawString(230, 685, "Processed on: " + print_time)
+            c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
+            c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
+            c.drawString(307, 640, "(22.270257, 114.131376, 161)")
+            c.line(220, 630, 550, 630)
+
+            c.setFont('Helvetica', 23, leading=None)
+            if order.priority == 1:
+                package_title = "ASP HIGH-PRIORITY PKG"
+            elif order.priority == 2:
+                package_title = "ASP MEDIUM-PRIORITY PKG"
+            else:
+                package_title = "ASP LOW-PRIORITY PKG"
+
+            c.drawCentredString(385, 605, package_title)
+
+            c.setFont('Helvetica', 15, leading=None)
+            c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
+            c.drawString(138, 555, clinic.name)
+            c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
+
+            c.line(60, 525, 550, 525)
+
+            styles = getSampleStyleSheet()
+            styles['Normal'].fontName = 'Times-Bold'
+            styles['Normal'].fontSize = 12
+            style = ParagraphStyle(
+                name='Body',
+                fontName='Times-Roman',
+                fontSize=12,
+            )
+
+            width, height = letter
+            data = [[Paragraph("ID", styles['Normal']),
+                     Paragraph("Name", styles['Normal']),
+                     Paragraph("Quantity", styles['Normal'])],
+                    ]
+
+            for item in item_details_list:
+                item_data = [Paragraph(str(item.item_id), style), Paragraph(item.name, style),
+                             Paragraph(str(item.quantity), style)]
+                data.append(item_data)
+
+            table = Table(data, colWidths=[30, 350, 70])
+
+            table.setStyle(TableStyle(
+                [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                 ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+                 ('VALIGN', (0, 0), (-1, 0), 'TOP'),
+                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                 ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
+
+            table.wrapOn(c, width, height)
+            table.wrapOn(c, width, height)
+            table.drawOn(c, 80, 300)
+
+            c.showPage()
+            c.save()
+
+            pdf = buffer.getvalue()
+            buffer.close()
+
+            f = open("shipping.pdf", "wb")
+            f.write(pdf)
+            f.close()
+            f = open("shipping.pdf", "r")
+            django_file = File(f)
+            order.file = django_file
+            order.save()
+            f.close()
+            os.remove("shipping.pdf")
+
         return render(request, 'main/order_details.html', context)
+
     else:
         request.session['error'] = "Oh no!"
         request.session['message'] = "Failed to view order"
@@ -752,120 +846,15 @@ def pdf_download(request):
     if request.method == 'POST':
         order_id = request.POST.get('id')
         order = Order.objects.get(pk=order_id)
-        clinic_manager = Order.objects.get(pk=order_id).clinicID
-        clinic = clinic_manager.locationID
-        items_list = ItemsInOrder.objects.filter(orderID=order_id).order_by('itemID').values_list('itemID', flat=True).distinct()
 
-        class ItemDetails:
-            def __init__(self, item_id, name, quantity):
-                self.item_id = item_id
-                self.name = name
-                self.quantity = quantity
-
-        item_details_list = []
-
-        for item in items_list:
-            temp = Order.objects.filter(pk=order_id)
-            item_name = ItemCatalogue.objects.get(pk=item).get_name()
-            item_quantity = temp[0].getItemQuantity(item)
-            item_details_list.append(ItemDetails(item, item_name, item_quantity))
-
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="ShippingLabel.pdf"'  # CHANGE TO ATTACHMENT
-
-        buffer = BytesIO()
-        c = canvas.Canvas(buffer, pagesize=portrait(letter))
-        c.setTitle("order"+str(order_id))
-        # Borders
-        c.line(60, 720, 550, 720)
-        c.line(60, 720, 60, 50)
-        c.line(60, 50, 550, 50)
-        c.line(550, 720, 550, 50)
-
+        pdf_name = order.file.name.split('/')[-1]
         directory = os.path.dirname(__file__)
-        logo = os.path.join(directory, 'media/qm_logo.jpg')
-        c.drawImage(logo, 80, 610, width=120, height=100)
+        path = os.path.join(directory, 'media/orderLabel/' + pdf_name)
 
-        c.line(60, 595, 550, 595)  # Horizontal line
-        c.line(220, 595, 220, 720)  # Vertical line
-        c.setFont('Helvetica', 12, leading=None)
-        print_time = str(datetime.date.today())
-        c.drawRightString(540, 700, "Order #"+str(order_id))
-        c.drawString(230, 700, "Ordered on: " + str(order.orderDateTime.date()))
-        c.drawString(230, 685, "Processed on: " + print_time)
-        c.drawString(230, 670, "Weight: " + str(order.weightRound()) + " kg")
-        c.drawString(230, 655, "Delivery from: Queen Mary Hospital")
-        c.drawString(307, 640, "(22.270257, 114.131376, 161)")
-        c.line(220, 630, 550, 630)
-
-        c.setFont('Helvetica', 23, leading=None)
-        if order.priority == 1:
-            package_title = "ASP HIGH-PRIORITY PKG"
-        elif order.priority == 2:
-            package_title = "ASP MEDIUM-PRIORITY PKG"
-        else:
-            package_title = "ASP LOW-PRIORITY PKG"
-
-        c.drawCentredString(385, 605, package_title)
-
-        c.setFont('Helvetica', 15, leading=None)
-        c.drawString(70, 575, "SHIP TO: " + clinic_manager.firstName + ' ' + clinic_manager.lastName)
-        c.drawString(138, 555, clinic.name)
-        c.drawString(138, 535, "(" + str(clinic.lat) + ", " + str(clinic.longitude) + ", " + str(clinic.alt) + ")")
-
-        c.line(60, 525, 550, 525)
-
-        styles = getSampleStyleSheet()
-        styles['Normal'].fontName = 'Times-Bold'
-        styles['Normal'].fontSize = 12
-        style = ParagraphStyle(
-            name='Body',
-            fontName='Times-Roman',
-            fontSize=12,
-        )
-
-        width, height = letter
-        data = [[Paragraph("ID", styles['Normal']),
-                 Paragraph("Name", styles['Normal']),
-                 Paragraph("Quantity", styles['Normal'])],
-                ]
-
-        for item in item_details_list:
-            item_data = [Paragraph(str(item.item_id), style), Paragraph(item.name, style), Paragraph(str(item.quantity), style)]
-            data.append(item_data)
-
-
-        table = Table(data, colWidths=[30, 350, 70])
-
-        table.setStyle(TableStyle(
-            [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-             ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
-             ('VALIGN', (0, 0), (-1, 0), 'TOP'),
-             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey)]))
-
-        table.wrapOn(c, width, height)
-        table.wrapOn(c, width, height)
-        table.drawOn(c, 80, 300)
-
-        c.showPage()
-        c.save()
-
-        pdf = buffer.getvalue()
-        buffer.close()
-        response.write(pdf)
-
-        f = open("shipping.pdf", "wb")
-        f.write(pdf)
-        f.close()
-        f = open("shipping.pdf", "r")
-        django_file = File(f)
-        order.file = django_file
-        order.save()
-        f.close()
-        os.remove("shipping.pdf")
-
-        return response
+        with open(path, 'r') as pdf:
+            response = HttpResponse(pdf.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename=ShippingLabel.pdf'
+            return response
 
     else:
         request.session['error'] = "Oh no!"
