@@ -7,7 +7,6 @@ from . import views
 urlpatterns = [
 
     ###pls delete###
-    url(r'^boredaf$', views.boredaf),
     url(r'^debug$', views.debug),
     ###pls delete###
 
