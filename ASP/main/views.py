@@ -25,11 +25,6 @@ import datetime, csv, os
 #global variable
 maxOrderWeight=23.8
 
-#####DELETE THIS###
-def boredaf(request):
-    return redirect('http://www.staggeringbeauty.com/')
-#####DELETE THIS###
-
 def registration(request):
     token=request.GET.get('token')
     if(request.method=='POST'):
@@ -132,7 +127,7 @@ def edit_profile(request):
         emailCounter = ClinicManager.objects.filter(email=email).count() +  WarehousePersonnel.objects.filter(email=email).count() + Dispatcher.objects.filter(email=email).count() 
 
         if(request.session['role']=="cm"):
-            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
+            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username and email already exist
                 error="Username and Email already exist."
                 usernameColor="red"
                 emailColor="red"
@@ -144,7 +139,7 @@ def edit_profile(request):
                     error="Email already exists."
                     emailColor="red"
         elif(request.session['role']=="wp"):
-            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
+            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username and email already exist
                 error="Username and Email already exist."
                 usernameColor="red"
                 emailColor="red"
@@ -156,7 +151,7 @@ def edit_profile(request):
                     error="Email already exists."
                     emailColor="red"
         elif(request.session['role']=="dp"):
-            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username already exists
+            if (username!=currentUser.username and userCounter == 1 and email!=currentUser.email and emailCounter == 1): #username and email already exist
                 error="Username and Email already exist."
                 usernameColor="red"
                 emailColor="red"
@@ -182,9 +177,9 @@ def edit_profile(request):
                     'warehouse' : warehouse,
                     'dispatcher' : dispatcher,
                 }
-        if(len(error)>0):
+        if(len(error)>0): #if input details have some error
             return render(request,'main/edit_profile.html',context)
-        else:
+        else: #else update the input details into database
             currentUser.firstName=firstName
             currentUser.lastName=lastName
             currentUser.username=username
@@ -192,13 +187,13 @@ def edit_profile(request):
             currentUser.image=image
             currentUser.save()
             if(request.session['role']=="cm"):
-                messages.error(request,'Data has been updated.')
+                messages.success(request,'Data has been updated.')
                 return redirect('/main/cm_home')
             elif(request.session['role']=="wp"):
-                messages.error(request,'Data has been updated.')
+                messages.success(request,'Data has been updated.')
                 return redirect('/main/wp_home')
             elif(request.session['role']=="dp"):
-                messages.error(request,'Data has been updated.')
+                messages.success(request,'Data has been updated.')
                 return redirect('/main/dp_dashboard')
     else:
         firstName= currentUser.firstName
